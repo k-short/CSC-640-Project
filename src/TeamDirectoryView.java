@@ -81,8 +81,8 @@ public class TeamDirectoryView extends JPanel {
 
         //Use the id to access the database and pull the known fields for associated member.
         //Dummy data for now
-        String[] fields = {"Kenneth Short", "Lead Car Cleaner", "310 Tern Court, KDH, NC 27948",
-                           "", "252-573-0928", ""};
+        String[] fields = {"Kenneth Short", "Lead Car Cleaner", "500 Kale Court, Greensboro, NC 27403",
+                           "", "543-345-2222", ""};
 
         //Create the panel and populate it with the labels and editable fields
         JPanel panel = new JPanel();
@@ -134,6 +134,6 @@ public class TeamDirectoryView extends JPanel {
         }
     }
 
-    String dummyText= "Kenneth Short\n" + "Lead Car Cleaner\n" +"310 Tern Court, KDH, NC 27948\n" +
-            "252-573-0928\n";
+    String dummyText= "Kenneth Short\n" + "Lead Car Cleaner\n" +"500 Kale Court, Greensboro, NC 27403\n" +
+            "543-345-2222\n";
 }
