@@ -146,13 +146,14 @@ public class TeamOwnerGUI extends Application{
         };
 
         //Add each directory string to the grid pane, setting a font size
-        for(int i = 0; i < directory.length; i+=2){
+        for(int i = 0; i < directory.length; i++){
             gridPane.add(directory[i], 1, i);
             directory[i].setFont(Font.font(DIR_FONT_SIZE));
 
             //Add a seperator between directory members
-            int index = i + 1;
-            gridPane.add(new Separator(), 0, index, 2, 1);
+            Separator separator = new Separator();
+            gridPane.setValignment(separator, VPos.BOTTOM);
+            gridPane.add(separator, 0, i, 2, 1);
 
             //Create a radio button to be added next to each directory member
             RadioButton radioButton = new RadioButton("");
@@ -294,14 +295,16 @@ public class TeamOwnerGUI extends Application{
         };
 
         //Add each directory string to the grid pane, setting a font size
-        for(int i = 0; i < directory.length; i+=2){
+        for(int i = 0; i < directory.length; i++){
             gridPane.add(directory[i], 1, i);
             //gridPane.setGridLinesVisible(true);
             directory[i].setFont(Font.font(DIR_FONT_SIZE));
 
             //Add a seperator between events
-            int index = i + 1;
-            gridPane.add(new Separator(), 0, index, 2, 1);
+            //Add a seperator between directory members
+            Separator separator = new Separator();
+            gridPane.setValignment(separator, VPos.BOTTOM);
+            gridPane.add(separator, 0, i, 2, 1);
 
             //Create a radio button to be added next to each directory member
             RadioButton radioButton = new RadioButton("");
