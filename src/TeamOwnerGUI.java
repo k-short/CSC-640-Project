@@ -1,195 +1,153 @@
-import javax.swing.*;
-import javax.swing.plaf.DimensionUIResource;
-import javax.swing.text.TabExpander;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ContainerAdapter;
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 /**
- * Main GUI class.
+ * Created by ken12_000 on 10/21/2016.
  */
-public class TeamOwnerGUI {
-    //Frame title
-    private final String FRAME_TITLE = "Team Owner";
+public class TeamOwnerGUI extends Application{
+    private final int MENU_TITLE_FONT_SIZE = 20;
+    private final int MENU_OPTION_FONT_SIZE = 18;
+    private final int DIR_FONT_SIZE = 14;
 
-    //Frame to hold all panels
-    private JFrame frame;
+    String dummyDir= "Kenneth Short\n" + "Lead Car Cleaner\n" +"500 Kale Court, Greensboro, NC 27403\n" +
+            "543-345-2222\n";
 
-    //Menu button fonts
-    private final Font PRESSED_FONT = new Font(Font.DIALOG,Font.BOLD, 16);
-    private final Font UNPRESSED_FONT = new Font(Font.DIALOG, Font.PLAIN, 16);
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        //Use a border pane as the root for the scene
+        BorderPane borderPane = new BorderPane();
 
-    //Button labels
-    private final String DIR_BUTTON_LBL = "Team Directory";
-    private final String SCH_BUTTON_LBL = "Event Schedule";
-    private final String FUNDS_BUTTON_LBL = "Team Funds";
-    private final String EXP_BUTTON_LBL = "Expense Requests";
+        //Create menu (VBox) to go on left side of border pane
+        borderPane.setLeft(addSideMenu());
 
-    //Menu buttons
-    private JButton directoryButton;
-    private JButton scheduleButton;
-    private JButton fundsButton;
-    private JButton expenseButton;
+        //Create grid pane to display main info, for the center of the border pane
+        borderPane.setCenter(addInfoPane());
 
-    //Spacing between menu items
-    private final int MENU_ITEM_SPACE = 30;
+        //Create a button panel to be added at the bottom of the border pane.
+        //These are the buttons that will interact with info in center pane.
+        borderPane.setBottom(addButtonPanel());
 
-    /**
-     * Default constructor for the GUI.
-     */
-    public TeamOwnerGUI(){
-        //Get the frame ready
-        frame = new JFrame();
-        frame.setTitle(FRAME_TITLE);
-        frame.setPreferredSize(new Dimension(1000, 600));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //Build the button menu and add it to the frame
-        JMenuBar navMenuBar = buildNavMenu();
-
-        Container contentPane = frame.getContentPane();
-        contentPane.setBackground(Color.WHITE);
-        contentPane.add(navMenuBar, BorderLayout.LINE_START);
-        contentPane.add(new TeamDirectoryView());
-
-        //Display the window
-        frame.pack();
-        frame.setLocationRelativeTo(null); // Center frame on screen
-        frame.setVisible(true);
+        //Create and show scene
+        Scene scene = new Scene(borderPane);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Team Owner Interface");
+        primaryStage.setMaximized(true);
+        primaryStage.show();
     }
 
     /**
-     * Build the button panel to hold buttons that the use can select
-     * to navigate to other panels of the GUI.
+     * Create a VBox to hold the menu on left side of border pane
      */
-    private JMenuBar buildNavMenu(){
-        //Create menu bar to hold the menu
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.PAGE_AXIS));
+    private VBox addSideMenu(){
+        VBox menu = new VBox();
 
-        //Build a menu to hold buttons
-        JMenu  menu = new JMenu();
+        //Set the padding around the vbox
+        menu.setPadding(new Insets(10));
 
-        //Create a button for each of the other panels
-        directoryButton = createMenuButton(DIR_BUTTON_LBL);
-        directoryButton.addActionListener(new TeamDirectoryButtonListener());
+        //Set the amount of space inbetween menu items
+        menu.setSpacing(30);
 
-        scheduleButton = createMenuButton(SCH_BUTTON_LBL);
-        scheduleButton.addActionListener(new EventScheduleButtonListener());
+        //Set the title for the menu
+        Text title = new Text("Team Owner");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, MENU_TITLE_FONT_SIZE));
+        menu.getChildren().add(title);
 
-        fundsButton = createMenuButton(FUNDS_BUTTON_LBL);
-        fundsButton.addActionListener(new TeamFundsButtonListener());
+        //Array of menu options
+        Text[] menuOptions = new Text[]{
+                new Text("Event Schedule"),
+                new Text("Team Directory"),
+                new Text("Team Funds"),
+                new Text("Expense Requests")};
 
-        expenseButton = createMenuButton(EXP_BUTTON_LBL);
-        expenseButton.addActionListener(new ExpenseRequestButtonListener());
+        //Add each of the menu options to the vbox
+        for (int i=0; i<4; i++) {
+            // Add offset to left side to indent from title
+            VBox.setMargin(menuOptions[i], new Insets(0, 0, 0, 40));
+            menu.getChildren().add(menuOptions[i]);
 
-        //Add each of the buttons to the button panel
-        menuBar.add(Box.createRigidArea(new Dimension(0, MENU_ITEM_SPACE)));
-        menuBar.add(scheduleButton);
-        menuBar.add(Box.createRigidArea(new Dimension(0, MENU_ITEM_SPACE)));
-        menuBar.add(directoryButton);
-        menuBar.add(Box.createRigidArea(new Dimension(0, MENU_ITEM_SPACE)));
-        menuBar.add(fundsButton);
-        menuBar.add(Box.createRigidArea(new Dimension(0, MENU_ITEM_SPACE)));
-        menuBar.add(expenseButton);
-
-        //Set the directory button as default pressed font
-        setPressedFont(scheduleButton);
-
-        return menuBar;
-    }
-
-    /**
-     * Private class for team directory button listener.
-     * Display the team directory panel.
-     */
-    private class TeamDirectoryButtonListener implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            setPressedFont(directoryButton);
-        }
-    }
-
-    /**
-     * Private class for event schedule button listener.
-     * Display the event schedule panel.
-     */
-    private class EventScheduleButtonListener implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            setPressedFont(scheduleButton);
-        }
-    }
-
-    /**
-     * Private class for team funds button listener.
-     * Display the team funds panel.
-     */
-    private class TeamFundsButtonListener implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            setPressedFont(fundsButton);
-        }
-    }
-
-    /**
-     * Private class for expense request button listener.
-     * Display the expense request panel.
-     */
-    private class ExpenseRequestButtonListener implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            setPressedFont(expenseButton);
-        }
-    }
-
-    /**
-     * Creates a menu button.
-     * The button will be displayed as just text.
-     */
-    private JButton createMenuButton(String label) {
-        JButton button = new JButton(label);
-
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorderPainted(false);
-        button.setFont(UNPRESSED_FONT);
-
-        Dimension dim = new Dimension(button.getPreferredSize().width + 15, button.getPreferredSize().height);
-        button.setPreferredSize(dim);
-
-        return button;
-    }
-
-    /**
-     * Set the given button to pressed.
-     * This simply changes the fonts of the buttons.
-     * Pressed button is bold, unpressed are plain.
-     */
-    private void setPressedFont(JButton button){
-        //Set pressed button to pressed font and others to unpressed font.
-        if(button.equals(directoryButton)){
-            directoryButton.setFont(PRESSED_FONT);
-            scheduleButton.setFont(UNPRESSED_FONT);
-            fundsButton.setFont(UNPRESSED_FONT);
-            expenseButton.setFont(UNPRESSED_FONT);
-        }else if(button.equals(scheduleButton)){
-            directoryButton.setFont(UNPRESSED_FONT);
-            scheduleButton.setFont(PRESSED_FONT);
-            fundsButton.setFont(UNPRESSED_FONT);
-            expenseButton.setFont(UNPRESSED_FONT);
-        }else if(button.equals(fundsButton)){
-            directoryButton.setFont(UNPRESSED_FONT);
-            scheduleButton.setFont(UNPRESSED_FONT);
-            fundsButton.setFont(PRESSED_FONT);
-            expenseButton.setFont(UNPRESSED_FONT);
-        }else if(button.equals(expenseButton)){
-            directoryButton.setFont(UNPRESSED_FONT);
-            scheduleButton.setFont(UNPRESSED_FONT);
-            fundsButton.setFont(UNPRESSED_FONT);
-            expenseButton.setFont(PRESSED_FONT);
+            //Set the font size of the menu option
+            menuOptions[i].setFont(Font.font(MENU_OPTION_FONT_SIZE));
         }
 
+        return menu;
+    }
+
+    /**
+     * Create a grid pane to show information based on menu option currently selected.
+     */
+    private ScrollPane addInfoPane(){
+        GridPane gridPane = new GridPane();
+        ToggleGroup toggleGroup = new ToggleGroup();
+
+        //Set padding and gaps
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(20, 20, 20, 20));
+
+        //Dummy info to be added for now
+        Text[] directory = new Text[]{
+                new Text(dummyDir),
+                new Text(dummyDir),
+                new Text(dummyDir),
+                new Text(dummyDir),
+                new Text(dummyDir),
+                new Text(dummyDir),
+                new Text(dummyDir),
+                new Text(dummyDir),
+                new Text(dummyDir),
+        };
+
+        //Add each directory string to the grid pane, setting a font size
+        for(int i = 0; i < directory.length; i++){
+            gridPane.add(directory[i], 1, i);
+            directory[i].setFont(Font.font(DIR_FONT_SIZE));
+
+            //Create a radio button to be added next to each directory member
+            RadioButton radioButton = new RadioButton("");
+            radioButton.setToggleGroup(toggleGroup);
+            gridPane.setValignment(radioButton, VPos.TOP); //Put button at top of cell
+            gridPane.add(radioButton, 0, i);
+        }
+
+        //Add the grid pane to a scroll pane
+        ScrollPane scrollPane = new ScrollPane(gridPane);
+
+        return scrollPane;
+    }
+
+    /**
+     * Create an HBox to hold buttons needed to interact with the information
+     * being displayed in the center of the border pane.
+     */
+    private HBox addButtonPanel(){
+        HBox buttonPanel = new HBox();
+        buttonPanel.setAlignment(Pos.CENTER);
+
+        //Set the padding around the button panel
+        buttonPanel.setPadding(new Insets(10));
+
+        //Set the gaps between buttons
+        buttonPanel.setSpacing(60);
+
+        //Create some default buttons for now
+        Button b1 = new Button("Delete");
+        Button b2 = new Button("Edit");
+
+        //Add the buttons to the hbox
+        buttonPanel.getChildren().addAll(b1, b2);
+
+        return buttonPanel;
     }
 }
