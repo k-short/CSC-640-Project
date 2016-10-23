@@ -17,6 +17,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import oracle.jrockit.jfr.StringConstantPool;
 
 import java.awt.*;
 
@@ -24,8 +25,10 @@ import java.awt.*;
  * Created by ken12_000 on 10/21/2016.
  */
 public class TeamOwnerGUI extends Application{
-    private final int MENU_TITLE_FONT_SIZE = 20;
-    private final int MENU_OPTION_FONT_SIZE = 18;
+    private final Font MENU_TITLE_FONT = Font.font("Arial", FontWeight.BOLD, 20);
+    private final Font MENU_OPTION_FONT = Font.font("Arial", FontWeight.NORMAL, 18);
+    private final Font LABEL_FONT = Font.font("Arial", FontWeight.BOLD, 18);
+    private final Font TEXT_FONT = Font.font("Arial", FontWeight.NORMAL, 14);
     private final int DIR_FONT_SIZE = 14;
     private BorderPane borderPane;
 
@@ -35,6 +38,15 @@ public class TeamOwnerGUI extends Application{
     String dummyEvent = "Datona 500 Race\n" + "Daytona International Speedway\n" +
                         "Daytona Beach, Florida\n" + "February 24, 2017\n" + "2:00 pm\n" +
                         "500 lap race.  Winner takes all.\n";
+
+    String dummyTran1 = "Remove:  $600";
+    String dummyRem1 = "$2000";
+    String dummyTran2 = "Add:  $1000";
+    String dummyRem2 = "$3000";
+    String dummyTran3 = "Add:  $7,500";
+    String dummyRem3 = "$10,500";
+    String dummyTran4 = "Remove:  $4,500";
+    String dummyRem4 = "$6000";
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -73,7 +85,7 @@ public class TeamOwnerGUI extends Application{
 
         //Set the title for the menu
         Text title = new Text("Team Owner");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, MENU_TITLE_FONT_SIZE));
+        title.setFont(MENU_TITLE_FONT);
         menu.getChildren().add(title);
 
         //Create menu buttons
@@ -100,7 +112,10 @@ public class TeamOwnerGUI extends Application{
             borderPane.setBottom(addDirectoryButtonHBox());
         });
 
-
+        funds.setOnAction((ActionEvent e) -> {
+            borderPane.setCenter(addFundsVBox());
+            borderPane.setBottom(addFundsButtonsHBox());
+        });
 
 
         //Array of menu options
@@ -113,7 +128,7 @@ public class TeamOwnerGUI extends Application{
             menu.getChildren().add(menuOptions[i]);
 
             //Set the font size of the menu option
-            menuOptions[i].setFont(Font.font(MENU_OPTION_FONT_SIZE));
+            menuOptions[i].setFont(MENU_OPTION_FONT);
 
         }
 
@@ -145,10 +160,11 @@ public class TeamOwnerGUI extends Application{
                 new Text(dummyDir),
         };
 
-        //Add each directory string to the grid pane, setting a font size
+        //Add each directory string to the grid pane
+        //Set font for each
         for(int i = 0; i < directory.length; i++){
             gridPane.add(directory[i], 1, i);
-            directory[i].setFont(Font.font(DIR_FONT_SIZE));
+            directory[i].setFont(TEXT_FONT);
 
             //Add a seperator between directory members
             Separator separator = new Separator();
@@ -189,7 +205,7 @@ public class TeamOwnerGUI extends Application{
         //If edit button is selected, switch to show dir change form and buttons
         editButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(addEditDirFormGridPane());
-            borderPane.setBottom(addEditDirButtonHBox());
+            borderPane.setBottom(addEditDirButtonsHBox());
         });
 
         //Show a dialog asking user if they want to delete member from directory.
@@ -228,7 +244,11 @@ public class TeamOwnerGUI extends Application{
                 new TextField("543-345-2222")
         };
 
+        //Add each label to grid pane
+        //Set normal text font to each
         for(int i = 0; i < labels.length; i++){
+            labels[i].setFont(TEXT_FONT);
+
             gridPane.add(labels[i], 0, i);
             gridPane.add(defaultFields[i], 1, i);
         }
@@ -239,7 +259,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create an hbox to hold buttons to interact with a directory member edit form.
      */
-    private HBox addEditDirButtonHBox(){
+    private HBox addEditDirButtonsHBox(){
         HBox buttonPanel = new HBox();
         buttonPanel.setAlignment(Pos.CENTER);
 
@@ -298,7 +318,7 @@ public class TeamOwnerGUI extends Application{
         for(int i = 0; i < directory.length; i++){
             gridPane.add(directory[i], 1, i);
             //gridPane.setGridLinesVisible(true);
-            directory[i].setFont(Font.font(DIR_FONT_SIZE));
+            directory[i].setFont(TEXT_FONT);
 
             //Add a seperator between events
             //Add a seperator between directory members
@@ -382,7 +402,11 @@ public class TeamOwnerGUI extends Application{
                 new TextField("500 lap race.  Winner takes all.")
         };
 
+        //Add events to grid
+        //Set font to each Text
         for(int i = 0; i < labels.length; i++){
+            labels[i].setFont(TEXT_FONT);
+
             gridPane.add(labels[i], 0, i);
             gridPane.add(defaultFields[i], 1, i);
         }
@@ -424,6 +448,117 @@ public class TeamOwnerGUI extends Application{
     }
 
     /**
-     * Create
+     * Create funds overview HBox for buttons to add/remove funds.
      */
+    private HBox addFundsButtonsHBox(){
+        HBox buttonPanel = new HBox();
+        buttonPanel.setAlignment(Pos.CENTER);
+
+        //Set the padding around the button panel
+        buttonPanel.setPadding(new Insets(10));
+
+        //Set the gaps between buttons
+        buttonPanel.setSpacing(60);
+
+        //Create some default buttons for now
+        Button cancelButton = new Button("Remove Funds");
+        Button saveButton = new Button("Add Funds");
+
+        cancelButton.setOnAction((ActionEvent e) -> {
+            borderPane.setCenter(addEventScrollPane());
+            borderPane.setBottom(addEventButtonsHBox());
+        });
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            borderPane.setCenter(addEventScrollPane());
+            borderPane.setBottom(addEventButtonsHBox());
+        });
+
+        //Add the buttons to the hbox
+        buttonPanel.getChildren().addAll(cancelButton, saveButton);
+
+        return buttonPanel;
+    }
+
+    /**
+     * Create funds VBox displaying available funds and a scrollable log for funds records.
+     * Records will show all previous fund removals and additions, time-stamped.
+     */
+    private VBox addFundsVBox(){
+        VBox vbox = new VBox();
+
+        //Set the padding around the vbox
+        vbox.setPadding(new Insets(30));
+
+        //Set the amount of space in between menu items
+        vbox.setSpacing(30);
+
+        //Create funds label
+        Label fundsLabel = new Label("Available funds:  $6,000");
+        fundsLabel.setFont(LABEL_FONT);
+
+        //Create funds log (scrollable pane)
+        ScrollPane fundsLog = addFundsLogScrollPane();
+
+        //Add funds label and log to vbox
+        vbox.getChildren().addAll(fundsLabel, fundsLog);
+
+        return vbox;
+    }
+
+    /**
+     * Create a grid pane to hold transaction records.
+     * Newest transition at top of grid pane.
+     * Put the grid pane in a scroll pane.
+     * Return the scroll pane.
+     */
+    private ScrollPane addFundsLogScrollPane(){
+        //Grid pane to hold transactions
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(60);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(25, 25, 25, 25));
+
+        //Labels for grid pane
+        Label transactionLabel = new Label("Transaction");
+        transactionLabel.setFont(LABEL_FONT);
+
+        Label remainingLabel = new Label("Funds Remaining");
+        remainingLabel.setFont(LABEL_FONT);
+
+        //Array of transactions as Texts
+        Text[] transactions = new Text[]{
+                new Text(dummyTran4),
+                new Text(dummyTran3),
+                new Text(dummyTran2),
+                new Text(dummyTran1)
+        };
+
+        //Array of remaining funds as Texts
+        Text[] remainingFunds = new Text[]{
+                new Text(dummyRem4),
+                new Text(dummyRem3),
+                new Text(dummyRem2),
+                new Text(dummyRem1)
+        };
+
+        //Add the grid pane labels to top of the grid pane
+        gridPane.add(transactionLabel, 0, 0);
+        gridPane.add(remainingLabel, 1, 0);
+
+        //Add transactions and remaining funds to grid pane
+        //Set the fonts of each Text
+        for(int i = 0; i < transactions.length; i++){
+            transactions[i].setFont(TEXT_FONT);
+            remainingFunds[i].setFont(TEXT_FONT);
+
+            gridPane.add(transactions[i], 0, (i + 1));
+            gridPane.add(remainingFunds[i], 1, (i + 1));
+        }
+
+        //Scroll pane to hold grid pane of transactions
+        ScrollPane scrollPane = new ScrollPane(gridPane);
+
+        return scrollPane;
+    }
 }
