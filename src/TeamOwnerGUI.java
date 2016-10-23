@@ -1,7 +1,6 @@
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
+import javafx.event.*;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -32,7 +31,7 @@ public class TeamOwnerGUI extends Application{
     private final Font MENU_OPTION_FONT = Font.font("Arial", FontWeight.NORMAL, 18);
     private final Font LABEL_FONT = Font.font("Arial", FontWeight.BOLD, 18);
     private final Font TEXT_FONT = Font.font("Arial", FontWeight.NORMAL, 14);
-    private final int DIR_FONT_SIZE = 14;
+    private final Insets CENTER_INSETS = new Insets(40, 40, 40, 40);
     private BorderPane borderPane;
 
     String dummyDirName = "Kenneth Short";
@@ -64,8 +63,7 @@ public class TeamOwnerGUI extends Application{
         //Create grid pane to display main info, for the center of the border pane.
         borderPane.setCenter(addEventScrollPane());
 
-        //Create a button panel to be added at the bottom of the border pane.
-        //These are the buttons that will interact with info in center pane.
+        //Blank HBox at bottom for border
         borderPane.setBottom(addBlankHBox());
 
         //Create and show scene
@@ -93,11 +91,16 @@ public class TeamOwnerGUI extends Application{
         title.setFont(MENU_TITLE_FONT);
         menu.getChildren().add(title);
 
-        //Create menu buttons
+        //Create menu buttons, remove button backgrounds
         ToggleButton schedule = new ToggleButton("Event Schedule");
         ToggleButton dir = new ToggleButton("Team Directory");
         ToggleButton funds = new ToggleButton("Team Funds");
         ToggleButton req = new ToggleButton("Expense Requests");
+
+        schedule.setBackground(Background.EMPTY);
+        dir.setBackground(Background.EMPTY);
+        funds.setBackground(Background.EMPTY);
+        req.setBackground(Background.EMPTY);
 
         //Add buttons to Togglegroup so only one can be toggled on
         ToggleGroup toggleGroup = new ToggleGroup();
@@ -108,21 +111,23 @@ public class TeamOwnerGUI extends Application{
 
         //Add events to buttons for when clicked
         schedule.setOnAction((ActionEvent e) -> {
+            schedule.setTextFill(Color.BLUE);
             borderPane.setCenter(addEventScrollPane());
             borderPane.setBottom(addBlankHBox());
         });
 
         dir.setOnAction((ActionEvent e) -> {
+            dir.setTextFill(Color.BLUE);
             borderPane.setCenter(addDirectoryScrollPane());
             borderPane.setBottom(addBlankHBox());
         });
 
         funds.setOnAction((ActionEvent e) -> {
+            funds.setTextFill(Color.BLUE);
             borderPane.setCenter(addFundsVBox());
             borderPane.setBottom(addFundsButtonsHBox());
         });
-
-
+        
         //Array of menu options
         ToggleButton[] menuOptions = new ToggleButton[]{schedule, dir, funds, req};
 
@@ -145,12 +150,11 @@ public class TeamOwnerGUI extends Application{
      */
     private ScrollPane addDirectoryScrollPane(){
         GridPane gridPane = new GridPane();
-        ToggleGroup toggleGroup = new ToggleGroup();
 
         //Set padding and gaps
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(20, 20, 20, 20));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Dummy dir names to be added (buttons)
         Button name1 = new Button(dummyDirName);
@@ -278,7 +282,7 @@ public class TeamOwnerGUI extends Application{
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
         Label[] labels = new Label[]{
@@ -351,7 +355,7 @@ public class TeamOwnerGUI extends Application{
         //Set padding and gaps
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(20, 20, 20, 20));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Selectable Event titles
         Button eventTitle1 = new Button(dummyEventTitle);
@@ -482,7 +486,7 @@ public class TeamOwnerGUI extends Application{
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
         Label[] labels = new Label[]{
@@ -590,7 +594,7 @@ public class TeamOwnerGUI extends Application{
         VBox vbox = new VBox();
 
         //Set the padding around the vbox
-        vbox.setPadding(new Insets(30));
+        vbox.setPadding(CENTER_INSETS);
 
         //Set the amount of space in between menu items
         vbox.setSpacing(30);
@@ -619,7 +623,7 @@ public class TeamOwnerGUI extends Application{
         GridPane gridPane = new GridPane();
         gridPane.setHgap(60);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Labels for grid pane
         Label transactionLabel = new Label("Transaction");
@@ -672,5 +676,15 @@ public class TeamOwnerGUI extends Application{
         hBox.setPrefHeight(20);
 
         return hBox;
+    }
+
+    /**
+     * Blank VBox to act as border on right side border pane.
+     */
+    private VBox addBlankVBox(){
+        VBox vBox = new VBox();
+        vBox.setPrefWidth(20);
+
+        return  vBox;
     }
 }
