@@ -172,18 +172,30 @@ public class TeamOwnerGUI extends Application{
             }
         };
 
-        name1.setOnAction(dirNamePress);
-        name2.setOnAction(dirNamePress);
-        name3.setOnAction(dirNamePress);
-        name4.setOnAction(dirNamePress);
-        name5.setOnAction(dirNamePress);
-        name6.setOnAction(dirNamePress);
-        name7.setOnAction(dirNamePress);
-        name8.setOnAction(dirNamePress);
-        name9.setOnAction(dirNamePress);
-
         //Add each button to Button array to be added to grid pane
         Button[] dirNames = new Button[]{ name1, name2, name3, name4, name5, name6, name7, name8, name9 };
+
+        //Apply settings to each button: font, action event, background
+        for(Button b : dirNames){
+            //Set fonts
+            b.setFont(LABEL_FONT);
+            b.setBackground(Background.EMPTY);
+            b.setOnAction(dirNamePress);
+            b.addEventHandler(MouseEvent.MOUSE_ENTERED,
+                    new EventHandler<MouseEvent>() {
+                        @Override public void handle(MouseEvent e) {
+                            b.setTextFill(Color.BLUE);
+                        }
+                    });
+
+            //Removing the shadow when the mouse cursor is off
+            b.addEventHandler(MouseEvent.MOUSE_EXITED,
+                    new EventHandler<MouseEvent>() {
+                        @Override public void handle(MouseEvent e) {
+                            b.setTextFill(Color.BLACK);
+                        }
+                    });
+        }
 
         //Dummy info (details) to be added for now
         Text[] dirDetails = new Text[]{
@@ -198,20 +210,24 @@ public class TeamOwnerGUI extends Application{
                 new Text(dummyDirDetails),
         };
 
+        //Set font of directory details Texts
+        for(Text t : dirDetails){
+            t.setFont(TEXT_FONT);
+        }
+
         //Add each directory name button followed by directory details for that name
         //Set font for each
-        for(int i = 0; i < dirNames.length; i++){
-            //Set fonts.  Label fonts for names, text fonts for details
-            dirNames[i].setFont(LABEL_FONT);
-            dirDetails[i].setFont(TEXT_FONT);
-
-            gridPane.add(dirNames[i], 0, i);
-            gridPane.add(dirDetails[i], 0, i);
+        int counter = 0;
+        for(int i = 0; i < dirNames.length*2; i+=2){
+            gridPane.add(dirNames[counter], 0, i);
+            gridPane.add(dirDetails[counter], 0, i+1);
 
             //Add a seperator between directory members
             Separator separator = new Separator();
             gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, i, 2, 1);
+            gridPane.add(separator, 0, i+1);
+
+            counter ++;
         }
 
         //Add the grid pane to a scroll pane
@@ -414,7 +430,7 @@ public class TeamOwnerGUI extends Application{
             //Add a seperator between events
             Separator separator = new Separator();
             gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, index, 2, 1);
+            gridPane.add(separator, 0, index);
 
             counter++;
         }
