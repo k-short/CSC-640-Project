@@ -1,7 +1,6 @@
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
+import javafx.event.*;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -12,7 +11,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -29,13 +31,15 @@ public class TeamOwnerGUI extends Application{
     private final Font MENU_OPTION_FONT = Font.font("Arial", FontWeight.NORMAL, 18);
     private final Font LABEL_FONT = Font.font("Arial", FontWeight.BOLD, 18);
     private final Font TEXT_FONT = Font.font("Arial", FontWeight.NORMAL, 14);
-    private final int DIR_FONT_SIZE = 14;
+    private final Insets CENTER_INSETS = new Insets(40, 40, 40, 40);
     private BorderPane borderPane;
 
-    String dummyDir= "Kenneth Short\n" + "Lead Car Cleaner\n" +"500 Kale Court, Greensboro, NC 27403\n" +
+    String dummyDirName = "Kenneth Short";
+    String dummyDirDetails= "Lead Car Cleaner\n" +"500 Kale Court, Greensboro, NC 27403\n" +
             "543-345-2222\n";
 
-    String dummyEvent = "Datona 500 Race\n" + "Daytona International Speedway\n" +
+    String dummyEventTitle = "Daytona 500 Race";
+    String dummyEventDetails = "Daytona International Speedway\n" +
                         "Daytona Beach, Florida\n" + "February 24, 2017\n" + "2:00 pm\n" +
                         "500 lap race.  Winner takes all.\n";
 
@@ -59,9 +63,8 @@ public class TeamOwnerGUI extends Application{
         //Create grid pane to display main info, for the center of the border pane.
         borderPane.setCenter(addEventScrollPane());
 
-        //Create a button panel to be added at the bottom of the border pane.
-        //These are the buttons that will interact with info in center pane.
-        borderPane.setBottom(addEventButtonsHBox());
+        //Blank HBox at bottom for border
+        borderPane.setBottom(addBlankHBox());
 
         //Create and show scene
         Scene scene = new Scene(borderPane);
@@ -88,11 +91,16 @@ public class TeamOwnerGUI extends Application{
         title.setFont(MENU_TITLE_FONT);
         menu.getChildren().add(title);
 
-        //Create menu buttons
+        //Create menu buttons, remove button backgrounds
         ToggleButton schedule = new ToggleButton("Event Schedule");
         ToggleButton dir = new ToggleButton("Team Directory");
         ToggleButton funds = new ToggleButton("Team Funds");
         ToggleButton req = new ToggleButton("Expense Requests");
+
+        schedule.setBackground(Background.EMPTY);
+        dir.setBackground(Background.EMPTY);
+        funds.setBackground(Background.EMPTY);
+        req.setBackground(Background.EMPTY);
 
         //Add buttons to Togglegroup so only one can be toggled on
         ToggleGroup toggleGroup = new ToggleGroup();
@@ -103,21 +111,23 @@ public class TeamOwnerGUI extends Application{
 
         //Add events to buttons for when clicked
         schedule.setOnAction((ActionEvent e) -> {
+            schedule.setTextFill(Color.BLUE);
             borderPane.setCenter(addEventScrollPane());
-            borderPane.setBottom(addEventButtonsHBox());
+            borderPane.setBottom(addBlankHBox());
         });
 
         dir.setOnAction((ActionEvent e) -> {
+            dir.setTextFill(Color.BLUE);
             borderPane.setCenter(addDirectoryScrollPane());
-            borderPane.setBottom(addDirectoryButtonHBox());
+            borderPane.setBottom(addBlankHBox());
         });
 
         funds.setOnAction((ActionEvent e) -> {
+            funds.setTextFill(Color.BLUE);
             borderPane.setCenter(addFundsVBox());
             borderPane.setBottom(addFundsButtonsHBox());
         });
-
-
+        
         //Array of menu options
         ToggleButton[] menuOptions = new ToggleButton[]{schedule, dir, funds, req};
 
@@ -140,42 +150,88 @@ public class TeamOwnerGUI extends Application{
      */
     private ScrollPane addDirectoryScrollPane(){
         GridPane gridPane = new GridPane();
-        ToggleGroup toggleGroup = new ToggleGroup();
 
         //Set padding and gaps
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(20, 20, 20, 20));
+        gridPane.setPadding(CENTER_INSETS);
 
-        //Dummy info to be added for now
-        Text[] directory = new Text[]{
-                new Text(dummyDir),
-                new Text(dummyDir),
-                new Text(dummyDir),
-                new Text(dummyDir),
-                new Text(dummyDir),
-                new Text(dummyDir),
-                new Text(dummyDir),
-                new Text(dummyDir),
-                new Text(dummyDir),
+        //Dummy dir names to be added (buttons)
+        Button name1 = new Button(dummyDirName);
+        Button name2 = new Button(dummyDirName);
+        Button name3 = new Button(dummyDirName);
+        Button name4 = new Button(dummyDirName);
+        Button name5 = new Button(dummyDirName);
+        Button name6 = new Button(dummyDirName);
+        Button name7 = new Button(dummyDirName);
+        Button name8 = new Button(dummyDirName);
+        Button name9 = new Button(dummyDirName);
+
+        //Add event to each button -> go to edit form page for name
+        EventHandler<ActionEvent> dirNamePress = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                borderPane.setCenter(addEditDirFormGridPane());
+                borderPane.setBottom(addEditDirButtonsHBox());
+            }
         };
 
-        //Add each directory string to the grid pane
+        //Add each button to Button array to be added to grid pane
+        Button[] dirNames = new Button[]{ name1, name2, name3, name4, name5, name6, name7, name8, name9 };
+
+        //Apply settings to each button: font, action event, background
+        for(Button b : dirNames){
+            //Set fonts
+            b.setFont(LABEL_FONT);
+            b.setBackground(Background.EMPTY);
+            b.setOnAction(dirNamePress);
+            b.addEventHandler(MouseEvent.MOUSE_ENTERED,
+                    new EventHandler<MouseEvent>() {
+                        @Override public void handle(MouseEvent e) {
+                            b.setTextFill(Color.BLUE);
+                        }
+                    });
+
+            //Removing the shadow when the mouse cursor is off
+            b.addEventHandler(MouseEvent.MOUSE_EXITED,
+                    new EventHandler<MouseEvent>() {
+                        @Override public void handle(MouseEvent e) {
+                            b.setTextFill(Color.BLACK);
+                        }
+                    });
+        }
+
+        //Dummy info (details) to be added for now
+        Text[] dirDetails = new Text[]{
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+                new Text(dummyDirDetails),
+        };
+
+        //Set font of directory details Texts
+        for(Text t : dirDetails){
+            t.setFont(TEXT_FONT);
+        }
+
+        //Add each directory name button followed by directory details for that name
         //Set font for each
-        for(int i = 0; i < directory.length; i++){
-            gridPane.add(directory[i], 1, i);
-            directory[i].setFont(TEXT_FONT);
+        int counter = 0;
+        for(int i = 0; i < dirNames.length*2; i+=2){
+            gridPane.add(dirNames[counter], 0, i);
+            gridPane.add(dirDetails[counter], 0, i+1);
 
             //Add a seperator between directory members
             Separator separator = new Separator();
             gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, i, 2, 1);
+            gridPane.add(separator, 0, i+1);
 
-            //Create a radio button to be added next to each directory member
-            RadioButton radioButton = new RadioButton("");
-            radioButton.setToggleGroup(toggleGroup);
-            gridPane.setValignment(radioButton, VPos.TOP); //Put button at top of cell
-            gridPane.add(radioButton, 0, i);
+            counter ++;
         }
 
         //Add the grid pane to a scroll pane
@@ -226,7 +282,7 @@ public class TeamOwnerGUI extends Application{
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
         Label[] labels = new Label[]{
@@ -299,38 +355,88 @@ public class TeamOwnerGUI extends Application{
         //Set padding and gaps
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(20, 20, 20, 20));
+        gridPane.setPadding(CENTER_INSETS);
 
-        //Dummy info to be added for now
-        Text[] directory = new Text[]{
-                new Text(dummyEvent),
-                new Text(dummyEvent),
-                new Text(dummyEvent),
-                new Text(dummyEvent),
-                new Text(dummyEvent),
-                new Text(dummyEvent),
-                new Text(dummyEvent),
-                new Text(dummyEvent),
-                new Text(dummyEvent),
+        //Selectable Event titles
+        Button eventTitle1 = new Button(dummyEventTitle);
+        Button eventTitle2 = new Button(dummyEventTitle);
+        Button eventTitle3 = new Button(dummyEventTitle);
+        Button eventTitle4 = new Button(dummyEventTitle);
+        Button eventTitle5 = new Button(dummyEventTitle);
+        Button eventTitle6 = new Button(dummyEventTitle);
+        Button eventTitle7 = new Button(dummyEventTitle);
+        Button eventTitle8 = new Button(dummyEventTitle);
+        Button eventTitle9 = new Button(dummyEventTitle);
+
+        //Event for each button press -> go to edit form page for event
+        EventHandler<ActionEvent> eventTitlePress = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                borderPane.setCenter(addEditEventGridPane());
+                borderPane.setBottom(addEditEventButtonsHBox());
+            }
         };
 
-        //Add each directory string to the grid pane, setting a font size
-        for(int i = 0; i < directory.length; i++){
-            gridPane.add(directory[i], 1, i);
-            //gridPane.setGridLinesVisible(true);
-            directory[i].setFont(TEXT_FONT);
+        //Array of Buttons to hold event titles
+        Button[] eventTitles = new Button[]{eventTitle1, eventTitle2, eventTitle3, eventTitle4, eventTitle5,
+                                            eventTitle6, eventTitle7, eventTitle8, eventTitle9};
+
+        //Apply settings to each button: font, action event, background
+        for(Button b : eventTitles){
+            //Set fonts
+            b.setFont(LABEL_FONT);
+            b.setBackground(Background.EMPTY);
+            b.setOnAction(eventTitlePress);
+            b.addEventHandler(MouseEvent.MOUSE_ENTERED,
+                    new EventHandler<MouseEvent>() {
+                        @Override public void handle(MouseEvent e) {
+                            b.setTextFill(Color.BLUE);
+                        }
+                    });
+
+            //Removing the shadow when the mouse cursor is off
+            b.addEventHandler(MouseEvent.MOUSE_EXITED,
+                    new EventHandler<MouseEvent>() {
+                        @Override public void handle(MouseEvent e) {
+                            b.setTextFill(Color.BLACK);
+                        }
+                    });
+        }
+
+        //Dummy info to be added for now
+        Text[] eventDetails = new Text[]{
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+                new Text(dummyEventDetails),
+        };
+
+        //Apply font to each event detail
+        for(Text t : eventDetails){
+            t.setFont(TEXT_FONT);
+        }
+
+        //Add each event to the grid pane
+        //Add event title button above each event detail
+        int counter = 0;
+        for(int i = 0; i < eventTitles.length*2; i+=2){
+            //Add each title and details to grid pane
+            gridPane.add(eventTitles[counter], 0, i);
+
+            int index = i + 1;
+            gridPane.add(eventDetails[counter], 0, index);
 
             //Add a seperator between events
-            //Add a seperator between directory members
             Separator separator = new Separator();
             gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, i, 2, 1);
+            gridPane.add(separator, 0, index);
 
-            //Create a radio button to be added next to each directory member
-            RadioButton radioButton = new RadioButton("");
-            radioButton.setToggleGroup(toggleGroup);
-            gridPane.setValignment(radioButton, VPos.TOP); //Put button at top of cell
-            gridPane.add(radioButton, 0, i);
+            counter++;
         }
 
         //Add the grid pane to a scroll pane
@@ -380,7 +486,7 @@ public class TeamOwnerGUI extends Application{
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
         Label[] labels = new Label[]{
@@ -488,7 +594,7 @@ public class TeamOwnerGUI extends Application{
         VBox vbox = new VBox();
 
         //Set the padding around the vbox
-        vbox.setPadding(new Insets(30));
+        vbox.setPadding(CENTER_INSETS);
 
         //Set the amount of space in between menu items
         vbox.setSpacing(30);
@@ -517,7 +623,7 @@ public class TeamOwnerGUI extends Application{
         GridPane gridPane = new GridPane();
         gridPane.setHgap(60);
         gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        gridPane.setPadding(CENTER_INSETS);
 
         //Labels for grid pane
         Label transactionLabel = new Label("Transaction");
@@ -560,5 +666,25 @@ public class TeamOwnerGUI extends Application{
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
         return scrollPane;
+    }
+
+    /**
+     * Blank hbox to act as border at bottom of border pane
+     */
+    private HBox addBlankHBox(){
+        HBox hBox = new HBox();
+        hBox.setPrefHeight(20);
+
+        return hBox;
+    }
+
+    /**
+     * Blank VBox to act as border on right side border pane.
+     */
+    private VBox addBlankVBox(){
+        VBox vBox = new VBox();
+        vBox.setPrefWidth(20);
+
+        return  vBox;
     }
 }
