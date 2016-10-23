@@ -66,7 +66,7 @@ public class TeamOwnerGUI extends Application{
 
         //Create a button panel to be added at the bottom of the border pane.
         //These are the buttons that will interact with info in center pane.
-        borderPane.setBottom(addEventButtonsHBox());
+        borderPane.setBottom(addBlankHBox());
 
         //Create and show scene
         Scene scene = new Scene(borderPane);
@@ -109,12 +109,12 @@ public class TeamOwnerGUI extends Application{
         //Add events to buttons for when clicked
         schedule.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(addEventScrollPane());
-            borderPane.setBottom(addEventButtonsHBox());
+            borderPane.setBottom(addBlankHBox());
         });
 
         dir.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(addDirectoryScrollPane());
-            borderPane.setBottom(addDirectoryButtonHBox());
+            borderPane.setBottom(addBlankHBox());
         });
 
         funds.setOnAction((ActionEvent e) -> {
@@ -662,5 +662,15 @@ public class TeamOwnerGUI extends Application{
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
         return scrollPane;
+    }
+
+    /**
+     * Blank hbox to act as border at bottom of border pane
+     */
+    private HBox addBlankHBox(){
+        HBox hBox = new HBox();
+        hBox.setPrefHeight(20);
+
+        return hBox;
     }
 }
