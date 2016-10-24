@@ -639,7 +639,7 @@ public class TeamOwnerGUI extends Application{
         vbox.setSpacing(30);
 
         //Create funds label
-        Label fundsLabel = new Label("Available funds:  $6,000");
+        Label fundsLabel = new Label("Available Funds:  $6,000");
         fundsLabel.setFont(LABEL_FONT);
 
         //Create funds log (scrollable pane)
@@ -1009,7 +1009,7 @@ public class TeamOwnerGUI extends Application{
         gridPane.setVgap(60);
         gridPane.setPadding(CENTER_INSETS);
 
-        Label remainingFunds = new Label("Availabe Funds:  $6,000");
+        Label remainingFunds = new Label("Available Funds:  $6,000");
         remainingFunds.setFont(LABEL_FONT);
 
         //Array of transactions as Texts
