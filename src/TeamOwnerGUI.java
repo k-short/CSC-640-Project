@@ -57,6 +57,9 @@ public class TeamOwnerGUI extends Application{
     String dummyTran4 = "Remove:  $4,500";
     String dummyRem4 = "$6000";
 
+    String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
+    String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         //Use a border pane as the root for the scene
@@ -177,8 +180,10 @@ public class TeamOwnerGUI extends Application{
             funds.setFont(MENU_OPTION_FONT_UNSEL);
             req.setFont(MENU_OPTION_FONT_SEL);
 
-            borderPane.setCenter(createFundsPane());
-            borderPane.setBottom(createFundsButtonPanel());
+            borderPane.setCenter(createExpenseRequestPane());
+            HBox blankHBox = new HBox();
+            blankHBox.setPrefHeight(20);
+            borderPane.setBottom(blankHBox);
         });
 
         //Add each of the menu options to the vbox
@@ -1000,52 +1005,59 @@ public class TeamOwnerGUI extends Application{
     private ScrollPane createExpenseRequestPane(){
         //Grid pane to hold transactions
         GridPane gridPane = new GridPane();
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
+        gridPane.setHgap(20);
+        gridPane.setVgap(60);
         gridPane.setPadding(CENTER_INSETS);
 
-        //Create funds log label
-        Label fundsLogLabel = new Label("Previous Transactions");
-        fundsLogLabel.setFont(LABEL_FONT);
-
-        //Labels for grid pane
-        Label transactionLabel = new Label("Transaction");
-        transactionLabel.setFont(TEXT_FONT);
-        transactionLabel.setUnderline(true);
-
-        Label remainingLabel = new Label("Funds Remaining");
-        remainingLabel.setFont(TEXT_FONT);
-        remainingLabel.setUnderline(true);
+        Label remainingFunds = new Label("Availabe Funds:  $6,000");
+        remainingFunds.setFont(LABEL_FONT);
 
         //Array of transactions as Texts
-        Text[] transactions = new Text[]{
-                new Text(dummyTran4),
-                new Text(dummyTran3),
-                new Text(dummyTran2),
-                new Text(dummyTran1)
+        Text[] requests = new Text[]{
+                new Text(dummyExpense1),
+                new Text(dummyExpense2),
+                new Text(dummyExpense1),
+                new Text(dummyExpense2),
+                new Text(dummyExpense1)
+        };
+
+        //Set font of requests
+        for(Text t : requests){
+            t.setFont(TEXT_FONT);
+        }
+
+        String decline = "Decline";
+        String accept = "Accept";
+
+        //Array of remaining funds as Texts
+        Button[] declineButtons = new Button[]{
+                new Button(decline),
+                new Button(decline),
+                new Button(decline),
+                new Button(decline),
+                new Button(decline)
         };
 
         //Array of remaining funds as Texts
-        Text[] remainingFunds = new Text[]{
-                new Text(dummyRem4),
-                new Text(dummyRem3),
-                new Text(dummyRem2),
-                new Text(dummyRem1)
+        Button[] acceptButtons = new Button[]{
+                new Button(accept),
+                new Button(accept),
+                new Button(accept),
+                new Button(accept),
+                new Button(accept)
         };
 
-        //Add the grid pane labels to top of the grid pane
-        gridPane.add(fundsLogLabel, 0, 0);
-        gridPane.add(transactionLabel, 0, 1);
-        gridPane.add(remainingLabel, 1, 1);
+        gridPane.add(remainingFunds, 0, 0);
 
-        //Add transactions and remaining funds to grid pane
-        //Set the fonts of each Text
-        for(int i = 0; i < transactions.length; i++){
-            transactions[i].setFont(TEXT_FONT);
-            remainingFunds[i].setFont(TEXT_FONT);
+        //Add the requests followed by accept/decline buttons
+        for(int i = 0; i < requests.length; i++){
+            gridPane.add(requests[i], 0, i + 1);
 
-            gridPane.add(transactions[i], 0, (i + 2));
-            gridPane.add(remainingFunds[i], 1, (i + 2));
+            gridPane.setValignment(declineButtons[i], VPos.TOP);
+            gridPane.setValignment(acceptButtons[i], VPos.CENTER);
+
+            gridPane.add(acceptButtons[i], 1, i + 1);
+            gridPane.add(declineButtons[i], 1, i + 1);
         }
 
         //Scroll pane to hold grid pane of transactions
