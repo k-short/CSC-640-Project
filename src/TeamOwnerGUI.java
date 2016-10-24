@@ -23,6 +23,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import oracle.jrockit.jfr.StringConstantPool;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -34,9 +35,12 @@ public class TeamOwnerGUI extends Application{
     private final Font MENU_OPTION_FONT_SEL = Font.font("Arial", FontWeight.BOLD, 18);
     private final Font LABEL_FONT = Font.font("Arial", FontWeight.BOLD, 18);
     private final Font TEXT_FONT = Font.font("Arial", FontWeight.NORMAL, 14);
-    private final Insets CENTER_INSETS = new Insets(1, 5, 5, 25);
+    private final Insets CENTER_INSETS = new Insets(1, 5, 5, 45);
     private final int FORM_VGAP = 30;
     private final int FORM_HGAP = 10;
+    private final int BUTTON_WIDTH = 160;
+    private final int BUTTON_HEIGHT = 40;
+    private final int TEXT_FIELD_WIDTH = 250;
     private BorderPane borderPane;
 
     String dummyDirName = "Kenneth Short";
@@ -307,6 +311,7 @@ public class TeamOwnerGUI extends Application{
 
         //Create some default buttons for now
         Button addButton = new Button("Add Member");
+        addButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         //If edit button is selected, switch to show dir change form and buttons
         addButton.setOnAction((ActionEvent e) -> {
@@ -345,6 +350,10 @@ public class TeamOwnerGUI extends Application{
                 new TextField("543-345-2222")
         };
 
+        for(TextField t : defaultFields){
+            t.setPrefWidth(TEXT_FIELD_WIDTH);
+        }
+
         //Add each label to grid pane
         //Set normal text font to each
         for(int i = 0; i < labels.length; i++){
@@ -373,6 +382,9 @@ public class TeamOwnerGUI extends Application{
         //Create some default buttons for now
         Button cancelButton = new Button("Cancel");
         Button saveButton = new Button("Save");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createDirectoryPane());
@@ -505,6 +517,7 @@ public class TeamOwnerGUI extends Application{
 
         //Create some default buttons for now
         Button addEventButton = new Button("Add Event");
+        addEventButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         //If edit button is selected, switch to show dir change form and buttons
         addEventButton.setOnAction((ActionEvent e) -> {
@@ -547,6 +560,10 @@ public class TeamOwnerGUI extends Application{
                 new TextField("500 lap race.  Winner takes all.")
         };
 
+        for(TextField t : defaultFields){
+            t.setPrefWidth(TEXT_FIELD_WIDTH);
+        }
+
         //Add events to grid
         //Set font to each Text
         for(int i = 0; i < labels.length; i++){
@@ -575,6 +592,9 @@ public class TeamOwnerGUI extends Application{
         //Create some default buttons for now
         Button cancelButton = new Button("Cancel");
         Button saveButton = new Button("Save");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createEventSchedulePane());
@@ -608,6 +628,9 @@ public class TeamOwnerGUI extends Application{
         //Create some default buttons for now
         Button removeButton = new Button("Remove Funds");
         Button addButton = new Button("Add Funds");
+
+        removeButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        addButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         removeButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createRemoveFundsForm());
@@ -747,6 +770,10 @@ public class TeamOwnerGUI extends Application{
                 new TextField()
         };
 
+        for(TextField t : defaultFields){
+            t.setPrefWidth(TEXT_FIELD_WIDTH);
+        }
+
         //Add events to grid
         //Set font to each Text
         for(int i = 0; i < labels.length; i++){
@@ -775,6 +802,9 @@ public class TeamOwnerGUI extends Application{
         //Create some default buttons for now
         Button cancelButton = new Button("Cancel");
         Button saveButton = new Button("Add Event");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createEventSchedulePane());
@@ -821,6 +851,10 @@ public class TeamOwnerGUI extends Application{
                 new TextField()
         };
 
+        for(TextField t : defaultFields){
+            t.setPrefWidth(TEXT_FIELD_WIDTH);
+        }
+
         //Add events to grid
         //Set font to each Text
         for(int i = 0; i < labels.length; i++){
@@ -849,6 +883,9 @@ public class TeamOwnerGUI extends Application{
         //Create some default buttons for now
         Button cancelButton = new Button("Cancel");
         Button saveButton = new Button("Add Member");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createDirectoryPane());
@@ -890,7 +927,7 @@ public class TeamOwnerGUI extends Application{
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
 
-        Label remainingFunds = new Label("Availabe Funds:  $6000");
+        Label remainingFunds = new Label("Available Funds:  $6,000");
         remainingFunds.setFont(LABEL_FONT);
 
         Label addLabel = new Label("Add amount:");
@@ -917,7 +954,7 @@ public class TeamOwnerGUI extends Application{
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
 
-        Label remainingFunds = new Label("Availabe Funds:  $6,000");
+        Label remainingFunds = new Label("Available Funds:  $6,000");
         remainingFunds.setFont(LABEL_FONT);
 
         Label addLabel = new Label("Remove amount:");
@@ -949,6 +986,9 @@ public class TeamOwnerGUI extends Application{
         //Create some default buttons for now
         Button cancelButton = new Button("Cancel");
         Button submitButton = new Button("Submit");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        submitButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createFundsPane());
@@ -982,6 +1022,9 @@ public class TeamOwnerGUI extends Application{
         //Create some default buttons for now
         Button cancelButton = new Button("Cancel");
         Button submitButton = new Button("Submit");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        submitButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createFundsPane());
@@ -1046,6 +1089,14 @@ public class TeamOwnerGUI extends Application{
                 new Button(accept),
                 new Button(accept)
         };
+
+        for(Button b : declineButtons){
+            b.setPrefSize(100, 20);
+        }
+
+        for(Button b : acceptButtons){
+            b.setPrefSize(100, 20);
+        }
 
         gridPane.add(remainingFunds, 0, 0);
 
