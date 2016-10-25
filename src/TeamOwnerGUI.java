@@ -61,6 +61,11 @@ public class TeamOwnerGUI extends Application{
     String dummyTran4 = "Remove:  $4,500";
     String dummyRem4 = "$6000";
 
+    String dummyDate1 = "9/12/2016";
+    String dummyDate2 = "9/30/2016";
+    String dummyDate3 = "10/2/2016";
+    String dummyDate4 = "10/19/2016";
+
     String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
     String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
 
@@ -683,8 +688,9 @@ public class TeamOwnerGUI extends Application{
     private ScrollPane createFundsLog(){
         //Grid pane to hold transactions
         GridPane gridPane = new GridPane();
+        gridPane.setPrefHeight(800);
         gridPane.setHgap(60);
-        gridPane.setVgap(10);
+        gridPane.setVgap(20);
         gridPane.setPadding(new Insets(5, 5, 5, 5));
 
         //Create funds log label
@@ -692,6 +698,10 @@ public class TeamOwnerGUI extends Application{
         fundsLogLabel.setFont(LABEL_FONT);
 
         //Labels for grid pane
+        Label dateLabel = new Label("Date");
+        dateLabel.setFont(TEXT_FONT);
+        dateLabel.setUnderline(true);
+
         Label transactionLabel = new Label("Transaction");
         transactionLabel.setFont(TEXT_FONT);
         transactionLabel.setUnderline(true);
@@ -699,6 +709,14 @@ public class TeamOwnerGUI extends Application{
         Label remainingLabel = new Label("Funds Remaining");
         remainingLabel.setFont(TEXT_FONT);
         remainingLabel.setUnderline(true);
+
+        //Array of dates as string right now
+        Text[] dates = new Text[]{
+                new Text(dummyDate4),
+                new Text(dummyDate3),
+                new Text(dummyDate2),
+                new Text(dummyDate1)
+        };
 
         //Array of transactions as Texts
         Text[] transactions = new Text[]{
@@ -717,18 +735,21 @@ public class TeamOwnerGUI extends Application{
         };
 
         //Add the grid pane labels to top of the grid pane
-        gridPane.add(fundsLogLabel, 0, 0);
-        gridPane.add(transactionLabel, 0, 1);
-        gridPane.add(remainingLabel, 1, 1);
+        gridPane.add(fundsLogLabel, 0, 0, 2, 1);
+        gridPane.add(dateLabel, 0, 1);
+        gridPane.add(transactionLabel, 1, 1);
+        gridPane.add(remainingLabel, 2, 1);
 
         //Add transactions and remaining funds to grid pane
         //Set the fonts of each Text
         for(int i = 0; i < transactions.length; i++){
+            dates[i].setFont(TEXT_FONT);
             transactions[i].setFont(TEXT_FONT);
             remainingFunds[i].setFont(TEXT_FONT);
 
-            gridPane.add(transactions[i], 0, (i + 2));
-            gridPane.add(remainingFunds[i], 1, (i + 2));
+            gridPane.add(dates[i], 0, (i + 2));
+            gridPane.add(transactions[i], 1, (i + 2));
+            gridPane.add(remainingFunds[i], 2, (i + 2));
         }
 
         //Scroll pane to hold grid pane of transactions
