@@ -17,6 +17,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -35,7 +36,7 @@ public class TeamOwnerGUI extends Application{
     private final Font MENU_OPTION_FONT_SEL = Font.font("Arial", FontWeight.BOLD, 18);
     private final Font LABEL_FONT = Font.font("Arial", FontWeight.BOLD, 18);
     private final Font TEXT_FONT = Font.font("Arial", FontWeight.NORMAL, 14);
-    private final Insets CENTER_INSETS = new Insets(1, 5, 5, 45);
+    private final Insets CENTER_INSETS = new Insets(10, 5, 5, 45);
     private final int FORM_VGAP = 30;
     private final int FORM_HGAP = 10;
     private final int BUTTON_WIDTH = 160;
@@ -73,6 +74,7 @@ public class TeamOwnerGUI extends Application{
     public void start(Stage primaryStage) throws Exception {
         //Use a border pane as the root for the scene
         borderPane = new BorderPane();
+        //borderPane.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         borderPane.setTop(createTopHBox());
 
@@ -84,6 +86,12 @@ public class TeamOwnerGUI extends Application{
 
         //Blank HBox at bottom for border
         borderPane.setBottom(createEventScheduleButtonsPanel());
+
+        //Right border
+        VBox rightBorder = new VBox();
+        rightBorder.setPrefWidth(30);
+        rightBorder.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        borderPane.setRight(rightBorder);
 
         //Create and show scene
         Scene scene = new Scene(borderPane);
@@ -98,6 +106,8 @@ public class TeamOwnerGUI extends Application{
      */
     private VBox addSideMenuVBox(){
         VBox menu = new VBox();
+        menu.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
 
         //Set the padding around the vbox
         //menu.setPadding(new Insets(10));
@@ -191,7 +201,8 @@ public class TeamOwnerGUI extends Application{
 
             borderPane.setCenter(createExpenseRequestPane());
             HBox blankHBox = new HBox();
-            blankHBox.setPrefHeight(20);
+            blankHBox.setPrefHeight(30);
+            blankHBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
             borderPane.setBottom(blankHBox);
         });
 
@@ -210,6 +221,7 @@ public class TeamOwnerGUI extends Application{
      */
     private ScrollPane createDirectoryPane(){
         GridPane gridPane = new GridPane();
+
 
         //Set padding and gaps
         gridPane.setHgap(10);
@@ -296,6 +308,8 @@ public class TeamOwnerGUI extends Application{
 
         //Add the grid pane to a scroll pane
         ScrollPane scrollPane = new ScrollPane(gridPane);
+        scrollPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         return scrollPane;
     }
@@ -306,6 +320,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createDirectoryButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -335,6 +350,8 @@ public class TeamOwnerGUI extends Application{
      */
     private GridPane createEditDirectoryForm(){
         GridPane gridPane = new GridPane();
+        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
         gridPane.setPadding(CENTER_INSETS);
@@ -376,6 +393,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createEditDirectoryButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -412,7 +430,6 @@ public class TeamOwnerGUI extends Application{
      */
     private ScrollPane createEventSchedulePane(){
         GridPane gridPane = new GridPane();
-        ToggleGroup toggleGroup = new ToggleGroup();
 
         //Set padding and gaps
         gridPane.setHgap(10);
@@ -503,6 +520,8 @@ public class TeamOwnerGUI extends Application{
 
         //Add the grid pane to a scroll pane
         ScrollPane scrollPane = new ScrollPane(gridPane);
+        scrollPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         return scrollPane;
     }
@@ -512,6 +531,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createEventScheduleButtonsPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -541,6 +561,8 @@ public class TeamOwnerGUI extends Application{
      */
     private GridPane createEditEventForm(){
         GridPane gridPane = new GridPane();
+        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
         gridPane.setPadding(CENTER_INSETS);
@@ -586,6 +608,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createEditEventButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -622,6 +645,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createFundsButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -659,6 +683,8 @@ public class TeamOwnerGUI extends Application{
      */
     private VBox createFundsPane(){
         VBox vbox = new VBox();
+        vbox.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         //Set the padding around the vbox
         vbox.setPadding(CENTER_INSETS);
@@ -688,10 +714,10 @@ public class TeamOwnerGUI extends Application{
     private ScrollPane createFundsLog(){
         //Grid pane to hold transactions
         GridPane gridPane = new GridPane();
-        gridPane.setPrefHeight(800);
         gridPane.setHgap(60);
-        gridPane.setVgap(20);
-        gridPane.setPadding(new Insets(5, 5, 5, 5));
+        gridPane.setVgap(30);
+        gridPane.setPadding(CENTER_INSETS);
+        //gridPane.setPadding(new Insets(5, 5, 5, 5));
 
         //Create funds log label
         Label fundsLogLabel = new Label("Previous Transactions");
@@ -715,6 +741,18 @@ public class TeamOwnerGUI extends Application{
                 new Text(dummyDate4),
                 new Text(dummyDate3),
                 new Text(dummyDate2),
+                new Text(dummyDate1),
+                new Text(dummyDate4),
+                new Text(dummyDate3),
+                new Text(dummyDate2),
+                new Text(dummyDate1),
+                new Text(dummyDate4),
+                new Text(dummyDate3),
+                new Text(dummyDate2),
+                new Text(dummyDate1),
+                new Text(dummyDate4),
+                new Text(dummyDate3),
+                new Text(dummyDate2),
                 new Text(dummyDate1)
         };
 
@@ -723,11 +761,36 @@ public class TeamOwnerGUI extends Application{
                 new Text(dummyTran4),
                 new Text(dummyTran3),
                 new Text(dummyTran2),
+                new Text(dummyTran1),
+                new Text(dummyTran4),
+                new Text(dummyTran3),
+                new Text(dummyTran2),
+                new Text(dummyTran1),
+                new Text(dummyTran4),
+                new Text(dummyTran3),
+                new Text(dummyTran2),
+                new Text(dummyTran1),
+                new Text(dummyTran4),
+                new Text(dummyTran3),
+                new Text(dummyTran2),
                 new Text(dummyTran1)
         };
 
         //Array of remaining funds as Texts
         Text[] remainingFunds = new Text[]{
+                new Text(dummyRem4),
+                new Text(dummyRem3),
+                new Text(dummyRem2),
+                new Text(dummyRem1),
+                new Text(dummyRem4),
+                new Text(dummyRem3),
+                new Text(dummyRem2),
+                new Text(dummyRem1),
+                new Text(dummyRem4),
+                new Text(dummyRem3),
+                new Text(dummyRem2),
+                new Text(dummyRem1),
+                new Text(dummyRem1),
                 new Text(dummyRem4),
                 new Text(dummyRem3),
                 new Text(dummyRem2),
@@ -763,6 +826,8 @@ public class TeamOwnerGUI extends Application{
      */
     private GridPane createAddEventForm(){
         GridPane gridPane = new GridPane();
+        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
         gridPane.setPadding(CENTER_INSETS);
@@ -812,6 +877,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createAddEventButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -848,6 +914,8 @@ public class TeamOwnerGUI extends Application{
      */
     private GridPane createAddMemberForm(){
         GridPane gridPane = new GridPane();
+        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
         gridPane.setPadding(CENTER_INSETS);
@@ -893,6 +961,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createAddMemberButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -929,6 +998,8 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createTopHBox(){
         HBox hBox = new HBox();
+        hBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
         Label label = new Label("Team Owner");
         label.setFont(MENU_TITLE_FONT);
         hBox.getChildren().add(label);
@@ -942,6 +1013,8 @@ public class TeamOwnerGUI extends Application{
      */
     private VBox createAddFundsForm(){
         VBox vBox = new VBox();
+        vBox.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         vBox.setPadding(CENTER_INSETS);
 
         GridPane gridPane = new GridPane();
@@ -969,6 +1042,8 @@ public class TeamOwnerGUI extends Application{
      */
     private VBox createRemoveFundsForm(){
         VBox vBox = new VBox();
+        vBox.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         vBox.setPadding(CENTER_INSETS);
 
         GridPane gridPane = new GridPane();
@@ -996,6 +1071,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createAddFundsButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -1032,6 +1108,7 @@ public class TeamOwnerGUI extends Application{
      */
     private HBox createRemoveFundsButtonPanel(){
         HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
 
         //Set the padding around the button panel
@@ -1134,6 +1211,8 @@ public class TeamOwnerGUI extends Application{
 
         //Scroll pane to hold grid pane of transactions
         ScrollPane scrollPane = new ScrollPane(gridPane);
+        scrollPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         return scrollPane;
     }
