@@ -1,6 +1,7 @@
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.*;
 import javafx.event.Event;
 import javafx.geometry.Insets;
@@ -26,6 +27,7 @@ import oracle.jrockit.jfr.StringConstantPool;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * Created by ken12_000 on 10/21/2016.
@@ -48,11 +50,6 @@ public class TeamOwnerGUI extends Application{
     String dummyDirDetails= "Lead Car Cleaner\n" +"500 Kale Court, Greensboro, NC 27403\n" +
             "543-345-2222\n";
 
-    String dummyEventTitle = "Daytona 500 Race";
-    String dummyEventDetails = "Daytona International Speedway\n" +
-                        "Daytona Beach, Florida\n" + "February 24, 2017\n" + "2:00 pm\n" +
-                        "500 lap race.  Winner takes all.\n";
-
     String dummyTran1 = "Remove:  $600";
     String dummyRem1 = "$2000";
     String dummyTran2 = "Add:  $1000";
@@ -70,22 +67,38 @@ public class TeamOwnerGUI extends Application{
     String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
     String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
 
+    private EventScheduleManagement eventMgmt = new EventScheduleManagement();
+    private ArrayList<TeamEvent> eventList;
+
+    private TextField eventTitleField;
+    private TextField eventSpeedwayField;
+    private TextField eventLocationField;
+    private TextField eventDateField;
+    private TextField eventTimeField;
+    private TextField eventDetailsField;
+
+    private int eventMonth;
+    private int eventDay;
+
+    //This is the index of the event/directory being edited
+    private int editingIndex;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         //Use a border pane as the root for the scene
         borderPane = new BorderPane();
         //borderPane.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        borderPane.setTop(createTopHBox());
+        borderPane.setTop(topHBox());
 
         //Create menu (VBox) to go on left side of border pane
         borderPane.setLeft(addSideMenuVBox());
 
         //Create grid pane to display main info, for the center of the border pane.
-        borderPane.setCenter(createEventSchedulePane());
+        borderPane.setCenter(eventSchedulePane());
 
         //Blank HBox at bottom for border
-        borderPane.setBottom(createEventScheduleButtonsPanel());
+        borderPane.setBottom(eventScheduleButtonPanel());
 
         //Right border
         VBox rightBorder = new VBox();
@@ -154,8 +167,8 @@ public class TeamOwnerGUI extends Application{
             funds.setFont(MENU_OPTION_FONT_UNSEL);
             req.setFont(MENU_OPTION_FONT_UNSEL);
 
-            borderPane.setCenter(createEventSchedulePane());
-            borderPane.setBottom(createEventScheduleButtonsPanel());
+            borderPane.setCenter(eventSchedulePane());
+            borderPane.setBottom(eventScheduleButtonPanel());
         });
 
         dir.setOnAction((ActionEvent e) -> {
@@ -169,8 +182,8 @@ public class TeamOwnerGUI extends Application{
             funds.setFont(MENU_OPTION_FONT_UNSEL);
             req.setFont(MENU_OPTION_FONT_UNSEL);
 
-            borderPane.setCenter(createDirectoryPane());
-            borderPane.setBottom(createDirectoryButtonPanel());
+            borderPane.setCenter(directoryPane());
+            borderPane.setBottom(directoryButtonPanel());
         });
 
         funds.setOnAction((ActionEvent e) -> {
@@ -184,8 +197,8 @@ public class TeamOwnerGUI extends Application{
             funds.setFont(MENU_OPTION_FONT_SEL);
             req.setFont(MENU_OPTION_FONT_UNSEL);
 
-            borderPane.setCenter(createFundsPane());
-            borderPane.setBottom(createFundsButtonPanel());
+            borderPane.setCenter(fundsPane());
+            borderPane.setBottom(fundsButtonPanel());
         });
 
         req.setOnAction((ActionEvent e) -> {
@@ -199,7 +212,7 @@ public class TeamOwnerGUI extends Application{
             funds.setFont(MENU_OPTION_FONT_UNSEL);
             req.setFont(MENU_OPTION_FONT_SEL);
 
-            borderPane.setCenter(createExpenseRequestPane());
+            borderPane.setCenter(expenseRequestPane());
             HBox blankHBox = new HBox();
             blankHBox.setPrefHeight(30);
             blankHBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -219,7 +232,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create a grid pane to show information based on menu option currently selected.
      */
-    private ScrollPane createDirectoryPane(){
+    private ScrollPane directoryPane(){
         GridPane gridPane = new GridPane();
 
 
@@ -243,8 +256,8 @@ public class TeamOwnerGUI extends Application{
         EventHandler<ActionEvent> dirNamePress = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                borderPane.setCenter(createEditDirectoryForm());
-                borderPane.setBottom(createEditDirectoryButtonPanel());
+                borderPane.setCenter(editDirectoryForm());
+                borderPane.setBottom(editDirectoryButtonPanel());
             }
         };
 
@@ -318,7 +331,7 @@ public class TeamOwnerGUI extends Application{
      * Create an HBox to hold buttons needed to interact with the information
      * being displayed in the center of the border pane.
      */
-    private HBox createDirectoryButtonPanel(){
+    private HBox directoryButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -335,8 +348,8 @@ public class TeamOwnerGUI extends Application{
 
         //If edit button is selected, switch to show dir change form and buttons
         addButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createAddMemberForm());
-            borderPane.setBottom(createAddMemberButtonPanel());
+            borderPane.setCenter(addMemberForm());
+            borderPane.setBottom(addMemberButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -348,7 +361,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create a form using a grid pane.
      */
-    private GridPane createEditDirectoryForm(){
+    private GridPane editDirectoryForm(){
         GridPane gridPane = new GridPane();
         gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -391,7 +404,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create an hbox to hold buttons to interact with a directory member edit form.
      */
-    private HBox createEditDirectoryButtonPanel(){
+    private HBox editDirectoryButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -410,13 +423,13 @@ public class TeamOwnerGUI extends Application{
         saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createDirectoryPane());
-            borderPane.setBottom(createDirectoryButtonPanel());
+            borderPane.setCenter(directoryPane());
+            borderPane.setBottom(directoryButtonPanel());
         });
 
         saveButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createDirectoryPane());
-            borderPane.setBottom(createDirectoryButtonPanel());
+            borderPane.setCenter(directoryPane());
+            borderPane.setBottom(directoryButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -428,94 +441,129 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create a grid panel to hold all events.  Wrap in a scroll pane.
      */
-    private ScrollPane createEventSchedulePane(){
+    private ScrollPane eventSchedulePane(){
         GridPane gridPane = new GridPane();
 
-        //Set padding and gaps
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-        gridPane.setPadding(CENTER_INSETS);
+        //Get event list
+        eventList = eventMgmt.getEventList();
 
-        //Selectable Event titles
-        Button eventTitle1 = new Button(dummyEventTitle);
-        Button eventTitle2 = new Button(dummyEventTitle);
-        Button eventTitle3 = new Button(dummyEventTitle);
-        Button eventTitle4 = new Button(dummyEventTitle);
-        Button eventTitle5 = new Button(dummyEventTitle);
-        Button eventTitle6 = new Button(dummyEventTitle);
-        Button eventTitle7 = new Button(dummyEventTitle);
-        Button eventTitle8 = new Button(dummyEventTitle);
-        Button eventTitle9 = new Button(dummyEventTitle);
+        //There is at least one event
+        if(eventList != null) {
+            //Set padding and gaps
+            gridPane.setHgap(10);
+            gridPane.setVgap(10);
+            gridPane.setPadding(CENTER_INSETS);
 
-        //Event for each button press -> go to edit form page for event
-        EventHandler<ActionEvent> eventTitlePress = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                borderPane.setCenter(createEditEventForm());
-                borderPane.setBottom(createEditEventButtonPanel());
+            //Event for each button press -> go to edit form page for event
+            //Retrieve the TeamEvent that was pressed by getting button id, which directly maps to the index
+            //in eventList for the event
+            EventHandler<ActionEvent> eventTitlePress = new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    Button btn = (Button) event.getSource();
+                    int id = Integer.parseInt(btn.getId());
+                    editingIndex = id;
+                    borderPane.setCenter(editEventForm(eventList.get(id)));
+                    borderPane.setBottom(editEventButtonPanel());
+                }
+            };
+
+            //Buttons for event titles
+            Button[] eventButtons = new Button[eventList.size()];
+            for (int i = 0; i < eventButtons.length; i++) {
+                eventButtons[i] = new Button(eventList.get(i).getTitle());
+                eventButtons[i].setId("" + i);
             }
-        };
 
-        //Array of Buttons to hold event titles
-        Button[] eventTitles = new Button[]{eventTitle1, eventTitle2, eventTitle3, eventTitle4, eventTitle5,
-                                            eventTitle6, eventTitle7, eventTitle8, eventTitle9};
+            //Apply settings to each button: font, action event, background
+            for (Button b : eventButtons) {
+                //Set fonts
+                b.setFont(LABEL_FONT);
+                b.setBackground(Background.EMPTY);
+                b.setOnAction(eventTitlePress);
+                b.addEventHandler(MouseEvent.MOUSE_ENTERED,
+                        new EventHandler<MouseEvent>() {
+                            @Override
+                            public void handle(MouseEvent e) {
+                                b.setTextFill(Color.BLUE);
+                            }
+                        });
 
-        //Apply settings to each button: font, action event, background
-        for(Button b : eventTitles){
-            //Set fonts
-            b.setFont(LABEL_FONT);
-            b.setBackground(Background.EMPTY);
-            b.setOnAction(eventTitlePress);
-            b.addEventHandler(MouseEvent.MOUSE_ENTERED,
-                    new EventHandler<MouseEvent>() {
-                        @Override public void handle(MouseEvent e) {
-                            b.setTextFill(Color.BLUE);
-                        }
-                    });
+                //Removing the shadow when the mouse cursor is off
+                b.addEventHandler(MouseEvent.MOUSE_EXITED,
+                        new EventHandler<MouseEvent>() {
+                            @Override
+                            public void handle(MouseEvent e) {
+                                b.setTextFill(Color.BLACK);
+                            }
+                        });
+            }
 
-            //Removing the shadow when the mouse cursor is off
-            b.addEventHandler(MouseEvent.MOUSE_EXITED,
-                    new EventHandler<MouseEvent>() {
-                        @Override public void handle(MouseEvent e) {
-                            b.setTextFill(Color.BLACK);
-                        }
-                    });
-        }
+            Text[] eventTitles = new Text[eventList.size()];
+            for (int i = 0; i < eventTitles.length; i++) {
+                eventTitles[i] = new Text(eventList.get(i).getTitle());
+                eventTitles[i].setFont(TEXT_FONT);
+            }
 
-        //Dummy info to be added for now
-        Text[] eventDetails = new Text[]{
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-                new Text(dummyEventDetails),
-        };
+            Text[] eventSpeedways = new Text[eventList.size()];
+            for (int i = 0; i < eventTitles.length; i++) {
+                eventSpeedways[i] = new Text(eventList.get(i).getSpeedway());
+                eventSpeedways[i].setFont(TEXT_FONT);
+            }
 
-        //Apply font to each event detail
-        for(Text t : eventDetails){
-            t.setFont(TEXT_FONT);
-        }
+            Text[] eventLocations = new Text[eventList.size()];
+            for (int i = 0; i < eventTitles.length; i++) {
+                eventLocations[i] = new Text(eventList.get(i).getLocation());
+                eventLocations[i].setFont(TEXT_FONT);
+            }
 
-        //Add each event to the grid pane
-        //Add event title button above each event detail
-        int counter = 0;
-        for(int i = 0; i < eventTitles.length*2; i+=2){
-            //Add each title and details to grid pane
-            gridPane.add(eventTitles[counter], 0, i);
+            Text[] eventDates = new Text[eventList.size()];
+            for (int i = 0; i < eventTitles.length; i++) {
+                eventDates[i] = new Text(eventList.get(i).getDate());
+                eventDates[i].setFont(TEXT_FONT);
+            }
 
-            int index = i + 1;
-            gridPane.add(eventDetails[counter], 0, index);
+            Text[] eventTimes = new Text[eventList.size()];
+            for (int i = 0; i < eventTitles.length; i++) {
+                eventTimes[i] = new Text(eventList.get(i).getTime());
+                eventTimes[i].setFont(TEXT_FONT);
+            }
 
-            //Add a seperator between events
-            Separator separator = new Separator();
-            gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, index);
+            Text[] eventDetails = new Text[eventList.size()];
+            for (int i = 0; i < eventTitles.length; i++) {
+                eventDetails[i] = new Text(eventList.get(i).getDetails());
+                eventDetails[i].setFont(TEXT_FONT);
+            }
 
-            counter++;
+            //Add each event to the grid pane
+            //Add event title button above each event detail
+            int counter = 0;
+            for (int i = 0; i < eventTitles.length * 2; i += 2) {
+                //Create event string
+                Text eventInfo = new Text(eventSpeedways[counter].getText() + "\n" + eventLocations[counter].getText() + "\n" +
+                        eventDates[counter].getText() + "\n" + eventTimes[counter].getText() + "\n" +
+                        eventDetails[counter].getText() + "\n");
+                eventInfo.setFont(TEXT_FONT);
+
+                //Add each title and details to grid pane
+                gridPane.add(eventButtons[counter], 0, i);
+
+                int index = i + 1;
+                gridPane.add(eventInfo, 0, index);
+
+                //Add a separator between events
+                Separator separator = new Separator();
+                gridPane.setValignment(separator, VPos.BOTTOM);
+                gridPane.add(separator, 0, index);
+
+                counter++;
+            }
+        }//end if
+        else{ //No events, make empty list to add to and display message to user.
+            eventList = new ArrayList<>();
+            Text noEvents = new Text("\n  There are no scheduled events.");
+            noEvents.setFont(LABEL_FONT);
+            gridPane.add(noEvents, 0, 0);
         }
 
         //Add the grid pane to a scroll pane
@@ -529,7 +577,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create HBox to hold buttons for event schedule.
      */
-    private HBox createEventScheduleButtonsPanel(){
+    private HBox eventScheduleButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -544,10 +592,10 @@ public class TeamOwnerGUI extends Application{
         Button addEventButton = new Button("Add Event");
         addEventButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
-        //If edit button is selected, switch to show dir change form and buttons
+        //If edit button is selected, switch to show event change form and buttons
         addEventButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createAddEventForm());
-            borderPane.setBottom(createAddEventButtonPanel());
+            borderPane.setCenter(addEventForm());
+            borderPane.setBottom(addEventButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -558,8 +606,9 @@ public class TeamOwnerGUI extends Application{
 
     /**
      * Create a grid pane showing event detials, allowing user to edit them.
+     * ID of button is passed in, this is the array index of the event list that this event will correspond to.
      */
-    private GridPane createEditEventForm(){
+    private GridPane editEventForm(TeamEvent event){
         GridPane gridPane = new GridPane();
         gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -577,15 +626,17 @@ public class TeamOwnerGUI extends Application{
                 new Label("Details:")
         };
 
+        //Assign TextFields
+        eventTitleField = new TextField(event.getTitle());
+        eventSpeedwayField = new TextField(event.getSpeedway());
+        eventLocationField = new TextField(event.getLocation());
+        eventDateField = new TextField(event.getDate());
+        eventTimeField = new TextField(event.getTime());
+        eventDetailsField = new TextField(event.getDetails());
+
         //Each field with default text already in directory (dummy text for now)
-        TextField[] defaultFields = new TextField[]{
-                new TextField("Daytona 500 Race"),
-                new TextField("Daytona Internaltional Speedway"),
-                new TextField("Daytona Beach, Florida"),
-                new TextField("February 24, 2017"),
-                new TextField("2:00 pm"),
-                new TextField("500 lap race.  Winner takes all.")
-        };
+        TextField[] defaultFields = new TextField[]{eventTitleField, eventSpeedwayField, eventLocationField,
+                                                    eventDateField, eventTimeField, eventDetailsField};
 
         for(TextField t : defaultFields){
             t.setPrefWidth(TEXT_FIELD_WIDTH);
@@ -606,7 +657,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create HBox to hold buttons for the edit event form.
      */
-    private HBox createEditEventButtonPanel(){
+    private HBox editEventButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -625,13 +676,26 @@ public class TeamOwnerGUI extends Application{
         saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createEventSchedulePane());
-            borderPane.setBottom(createEventScheduleButtonsPanel());
+            borderPane.setCenter(eventSchedulePane());
+            borderPane.setBottom(eventScheduleButtonPanel());
         });
 
         saveButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createEventSchedulePane());
-            borderPane.setBottom(createEventScheduleButtonsPanel());
+            //Save the event in  the event list, replacing the old one
+            TeamEvent updatedEvent = new TeamEvent();
+            updatedEvent.setTitle(eventTitleField.getText());
+            updatedEvent.setSpeedway(eventSpeedwayField.getText());
+            updatedEvent.setLocation(eventLocationField.getText());
+            //updatedEvent.setDate(eventDateField.getText());
+            updatedEvent.setTime(eventTimeField.getText());
+            updatedEvent.setDetails(eventDetailsField.getText());
+            eventList.set(editingIndex, updatedEvent);
+
+            //Update the modified list with event management
+            eventMgmt.updateEventList(eventList);
+
+            borderPane.setCenter(eventSchedulePane());
+            borderPane.setBottom(eventScheduleButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -643,7 +707,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create funds overview HBox for buttons to add/remove funds.
      */
-    private HBox createFundsButtonPanel(){
+    private HBox fundsButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -662,13 +726,13 @@ public class TeamOwnerGUI extends Application{
         addButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         removeButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createRemoveFundsForm());
-            borderPane.setBottom(createRemoveFundsButtonPanel());
+            borderPane.setCenter(removeFundsForm());
+            borderPane.setBottom(removeFundsButtonPanel());
         });
 
         addButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createAddFundsForm());
-            borderPane.setBottom(createAddFundsButtonPanel());
+            borderPane.setCenter(addFundsForm());
+            borderPane.setBottom(addFundsButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -681,7 +745,7 @@ public class TeamOwnerGUI extends Application{
      * Create funds VBox displaying available funds and a scrollable log for funds records.
      * Records will show all previous fund removals and additions, time-stamped.
      */
-    private VBox createFundsPane(){
+    private VBox fundsPane(){
         VBox vbox = new VBox();
         vbox.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -697,7 +761,7 @@ public class TeamOwnerGUI extends Application{
         fundsLabel.setFont(LABEL_FONT);
 
         //Create funds log (scrollable pane)
-        ScrollPane fundsLog = createFundsLog();
+        ScrollPane fundsLog = fundsLog();
 
         //Add funds label and log to vbox
         vbox.getChildren().addAll(fundsLabel, fundsLog);
@@ -711,7 +775,7 @@ public class TeamOwnerGUI extends Application{
      * Put the grid pane in a scroll pane.
      * Return the scroll pane.
      */
-    private ScrollPane createFundsLog(){
+    private ScrollPane fundsLog(){
         //Grid pane to hold transactions
         GridPane gridPane = new GridPane();
         gridPane.setHgap(60);
@@ -824,7 +888,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create a form for adding a new event
      */
-    private GridPane createAddEventForm(){
+    private GridPane addEventForm(){
         GridPane gridPane = new GridPane();
         gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -837,7 +901,6 @@ public class TeamOwnerGUI extends Application{
                 new Label("Event Name:"),
                 new Label("Speedway:"),
                 new Label("Location:"),
-                new Label("Date:"),
                 new Label("Time:"),
                 new Label("Details:")
         };
@@ -847,35 +910,91 @@ public class TeamOwnerGUI extends Application{
             l.setFont(TEXT_FONT);
         }
 
-        TextField[] defaultFields = new TextField[]{
-                new TextField(),
-                new TextField(),
-                new TextField(),
-                new TextField(),
-                new TextField(),
-                new TextField()
-        };
+        //Assign TextFields
+        eventTitleField = new TextField();
+        eventSpeedwayField = new TextField();
+        eventLocationField = new TextField();
+        eventDateField = new TextField();
+        eventTimeField = new TextField();
+        eventDetailsField = new TextField();
+
+        //Each field with default text already in directory (dummy text for now)
+        TextField[] defaultFields = new TextField[]{eventTitleField, eventSpeedwayField, eventLocationField,
+                eventTimeField, eventDetailsField};
 
         for(TextField t : defaultFields){
             t.setPrefWidth(TEXT_FIELD_WIDTH);
         }
 
+        //Make choice box for date (month)
+        final ChoiceBox monthBox = new ChoiceBox(FXCollections.observableArrayList("January", "February", "March",
+                                        "April", "May", "June", "July", "August", "September", "October",
+                                        "November", "December"));
+        monthBox.getSelectionModel().selectFirst();
+        eventMonth = 1;
+
+        ChoiceBox dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                "24", "25", "26", "27", "28", "29", "30", "31"));
+        dayBox.getSelectionModel().selectFirst();
+        eventDay = 1;
+
+        monthBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                eventMonth = newValue.intValue() + 1;
+                ChoiceBox dayBox;
+                if(eventMonth == 2){
+                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                            "24", "25", "26", "27", "28"));
+                }else if(eventMonth == 4 || eventMonth == 6 || eventMonth == 9 || eventMonth == 11){
+                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                            "24", "25", "26", "27", "28", "29", "30"));
+                }else{
+                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                            "24", "25", "26", "27", "28", "29", "30", "31"));
+                }
+                dayBox.getSelectionModel().selectFirst();
+                dayBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                        eventDay = newValue.intValue() + 1;
+                    }
+                });
+                HBox hBox = new HBox();
+                hBox.setSpacing(20);
+                hBox.getChildren().addAll(monthBox, dayBox);
+                gridPane.add(hBox, 1, 3);
+            }
+        });
+
         //Add events to grid
         //Set font to each Text
         for(int i = 0; i < labels.length; i++){
-            labels[i].setFont(TEXT_FONT);
-
-            gridPane.add(labels[i], 0, i);
-            gridPane.add(defaultFields[i], 1, i);
+            if(i == 3){
+                Label dateLabel = new Label("Date:");
+                dateLabel.setFont(TEXT_FONT);
+                gridPane.add(dateLabel, 0, i);
+                HBox hBox = new HBox();
+                hBox.setSpacing(20);
+                hBox.getChildren().addAll(monthBox, dayBox);
+                gridPane.add(hBox, 1, i);
+            }else {
+                labels[i].setFont(TEXT_FONT);
+                gridPane.add(labels[i], 0, i);
+                gridPane.add(defaultFields[i], 1, i);
+            }
         }
-
         return gridPane;
     }
 
     /**
      * Buttons for add event form.
      */
-    private HBox createAddEventButtonPanel(){
+    private HBox addEventButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -894,13 +1013,26 @@ public class TeamOwnerGUI extends Application{
         saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createEventSchedulePane());
-            borderPane.setBottom(createEventScheduleButtonsPanel());
+            borderPane.setCenter(eventSchedulePane());
+            borderPane.setBottom(eventScheduleButtonPanel());
         });
 
         saveButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createEventSchedulePane());
-            borderPane.setBottom(createEventScheduleButtonsPanel());
+            //Save the event in  the event list
+            TeamEvent newEvent = new TeamEvent();
+            newEvent.setTitle(eventTitleField.getText());
+            newEvent.setSpeedway(eventSpeedwayField.getText());
+            newEvent.setLocation(eventLocationField.getText());
+            newEvent.setDate(eventMonth, eventDay);
+            newEvent.setTime(eventTimeField.getText());
+            newEvent.setDetails(eventDetailsField.getText());
+            eventList.add(newEvent);
+
+            //Update the modified list with event management
+            eventMgmt.updateEventList(eventList);
+
+            borderPane.setCenter(eventSchedulePane());
+            borderPane.setBottom(eventScheduleButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -912,7 +1044,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create a form for adding a new event
      */
-    private GridPane createAddMemberForm(){
+    private GridPane addMemberForm(){
         GridPane gridPane = new GridPane();
         gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -959,7 +1091,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Buttons for add event form.
      */
-    private HBox createAddMemberButtonPanel(){
+    private HBox addMemberButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -978,13 +1110,13 @@ public class TeamOwnerGUI extends Application{
         saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createDirectoryPane());
-            borderPane.setBottom(createDirectoryButtonPanel());
+            borderPane.setCenter(directoryPane());
+            borderPane.setBottom(directoryButtonPanel());
         });
 
         saveButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createDirectoryPane());
-            borderPane.setBottom(createDirectoryButtonPanel());
+            borderPane.setCenter(directoryPane());
+            borderPane.setBottom(directoryButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -996,7 +1128,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * HBox for top.
      */
-    private HBox createTopHBox(){
+    private HBox topHBox(){
         HBox hBox = new HBox();
         hBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
@@ -1011,7 +1143,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Add funds form.
      */
-    private VBox createAddFundsForm(){
+    private VBox addFundsForm(){
         VBox vBox = new VBox();
         vBox.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -1040,7 +1172,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Remove funds form.
      */
-    private VBox createRemoveFundsForm(){
+    private VBox removeFundsForm(){
         VBox vBox = new VBox();
         vBox.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -1069,7 +1201,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Button panel for add funds form.
      */
-    private HBox createAddFundsButtonPanel(){
+    private HBox addFundsButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -1088,13 +1220,13 @@ public class TeamOwnerGUI extends Application{
         submitButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createFundsPane());
-            borderPane.setBottom(createFundsButtonPanel());
+            borderPane.setCenter(fundsPane());
+            borderPane.setBottom(fundsButtonPanel());
         });
 
         submitButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createFundsPane());
-            borderPane.setBottom(createFundsButtonPanel());
+            borderPane.setCenter(fundsPane());
+            borderPane.setBottom(fundsButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -1106,7 +1238,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Button panel for add funds form.
      */
-    private HBox createRemoveFundsButtonPanel(){
+    private HBox removeFundsButtonPanel(){
         HBox buttonPanel = new HBox();
         buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         buttonPanel.setAlignment(Pos.CENTER);
@@ -1125,13 +1257,13 @@ public class TeamOwnerGUI extends Application{
         submitButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
         cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createFundsPane());
-            borderPane.setBottom(createFundsButtonPanel());
+            borderPane.setCenter(fundsPane());
+            borderPane.setBottom(fundsButtonPanel());
         });
 
         submitButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createFundsPane());
-            borderPane.setBottom(createFundsButtonPanel());
+            borderPane.setCenter(fundsPane());
+            borderPane.setBottom(fundsButtonPanel());
         });
 
         //Add the buttons to the hbox
@@ -1143,7 +1275,7 @@ public class TeamOwnerGUI extends Application{
     /**
      * Create expense requests pane.
      */
-    private ScrollPane createExpenseRequestPane(){
+    private ScrollPane expenseRequestPane(){
         //Grid pane to hold transactions
         GridPane gridPane = new GridPane();
         gridPane.setHgap(20);
