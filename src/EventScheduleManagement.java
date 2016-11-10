@@ -12,23 +12,6 @@ public class EventScheduleManagement {
      */
     public EventScheduleManagement(){
         eventAccess = new EventAccess();
-
-        //Create default event list
-        eventList = new ArrayList<>();
-        TeamEvent dummy1 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy2 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy3 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy4 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy5 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy6 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy7 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy8 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy9 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        TeamEvent dummy10 = new TeamEvent("Daytona 500", "Daytona Speedway", "Florida", "6/24/16", "5:00", "Cool race.");
-        //eventList.add(dummy1);eventList.add(dummy2);eventList.add(dummy3);eventList.add(dummy4);eventList.add(dummy5);
-        //eventList.add(dummy6);eventList.add(dummy7);eventList.add(dummy8);eventList.add(dummy9);eventList.add(dummy10);
-        //eventAccess.saveEvents(eventList);
-
         eventList = eventAccess.getEvents();
     }
 

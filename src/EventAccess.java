@@ -18,7 +18,6 @@ public class EventAccess {
             out.writeObject(eventList);
             out.close();
             fileOut.close();
-            System.out.printf("Serialized data is saved in events.ser");
         }catch(IOException i) {
             i.printStackTrace();
         }

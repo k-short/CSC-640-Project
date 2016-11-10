@@ -10,21 +10,11 @@ public class TeamEvent implements Serializable{
     private String date;
     private String time;
     private String details;
-    int month;
-    int day;
-
-    public TeamEvent(String tl, String s, String l, String dt, String tm, String ds){
-        title = tl;
-        speedway = s;
-        location = l;
-        date = dt;
-        time = tm;
-        details = ds;
-    }
-
-    public TeamEvent(){
-      //default constructor
-    }
+    private int month;
+    private int day;
+    private int hour;
+    private int minute;
+    private String AMPM;
 
     public String getTitle() {
         return title;
@@ -54,6 +44,27 @@ public class TeamEvent implements Serializable{
         return date;
     }
 
+    public int getMonth(){
+        return month;
+    }
+
+    public int getHour() {
+        return hour;
+    }
+
+    public int getMinute() {
+        return minute;
+    }
+
+    public String getAMPM() {
+        return AMPM;
+    }
+
+    public int getDay(){
+        return day;
+
+    }
+
     public void setDate(int month, int day) {
         this.month = month;
         this.day = day;
@@ -64,15 +75,27 @@ public class TeamEvent implements Serializable{
         else
             year = 2017;
 
-        date = month + "\\" + day + "\\" + year;
+        date = month + "/" + day + "/" + year;
     }
 
     public String getTime() {
         return time;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setTime(int h, int m, String ampm) {
+        hour = h;
+        minute = m;
+        AMPM = ampm;
+
+        String minuteStr = "";
+        if(minute == 0)
+            minuteStr = "00";
+        else if(minute == 5)
+            minuteStr = "05";
+        else
+            minuteStr = minute + "";
+
+        time = hour + ":" + minuteStr + " " + ampm;
     }
 
     public String getDetails() {
