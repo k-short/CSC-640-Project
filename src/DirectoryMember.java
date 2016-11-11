@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Created by ken12_000 on 11/10/2016.
  */
-public class DirectoryMember {
+public class DirectoryMember implements Serializable{
     String name;
     String jobTitle;
     String address;

@@ -12,7 +12,11 @@ public class TeamDirectoryManagement {
      */
     public TeamDirectoryManagement(){
         directoryAccess = new DirectoryAccess();
-        directory = directoryAccess.getDirectory();
+
+        if(directoryAccess.getDirectory() != null)
+            directory = directoryAccess.getDirectory();
+        else
+            directory = new ArrayList<>();
     }
 
     /**
@@ -45,7 +49,7 @@ public class TeamDirectoryManagement {
     /**
      * Update the event list
      */
-    public void updateEventList(ArrayList<DirectoryMember> dir){
+    public void updateDirectory(ArrayList<DirectoryMember> dir){
         directoryAccess.saveDirectory(dir);
         directory = dir;
         sortDirectory();

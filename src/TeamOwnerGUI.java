@@ -74,6 +74,11 @@ public class TeamOwnerGUI extends Application{
     private TextField eventLocationField;
     private TextField eventDetailsField;
 
+    private TextField dirNameField;
+    private TextField dirJobTitleField;
+    private TextField dirAddressField;
+    private TextField dirPhoneNumField;
+
     private int eventMonth;
     private int eventDay;
     private int eventHour;
@@ -243,12 +248,15 @@ public class TeamOwnerGUI extends Application{
         gridPane.setPadding(CENTER_INSETS);
 
         //There is at least one directory member
-        if(directory != null) {
+        if(directory.size() > 0) {
             //Add event to each button -> go to edit form page for name
             EventHandler<ActionEvent> dirNamePress = new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    borderPane.setCenter(editDirectoryForm());
+                    Button btn = (Button) event.getSource();
+                    int id = Integer.parseInt(btn.getId());
+                    editingIndex = id;
+                    borderPane.setCenter(editDirectoryForm(directory.get(id)));
                     borderPane.setBottom(editDirectoryButtonPanel());
                 }
             };
@@ -378,9 +386,9 @@ public class TeamOwnerGUI extends Application{
     }
 
     /**
-     * Create a form using a grid pane.
+     * Create a form for adding a new event
      */
-    private GridPane editDirectoryForm(){
+    private GridPane addMemberForm(){
         GridPane gridPane = new GridPane();
         gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -396,13 +404,107 @@ public class TeamOwnerGUI extends Application{
                 new Label("Phone Number:")
         };
 
-        //Each field with default text already in directory (dummy text for now)
-        TextField[] defaultFields = new TextField[]{
-                new TextField("Kenneth Short"),
-                new TextField("Lead Car Cleaner"),
-                new TextField("500 Kale Court, Greensboro, NC 27403"),
-                new TextField("543-345-2222")
+        //Set font to each label
+        for(Label l : labels){
+            l.setFont(TEXT_FONT);
+        }
+
+        dirNameField = new TextField();
+        dirJobTitleField = new TextField();
+        dirAddressField = new TextField();
+        dirPhoneNumField = new TextField();
+
+        TextField[] defaultFields = new TextField[]{dirNameField, dirJobTitleField,
+                                                dirAddressField, dirPhoneNumField};
+
+        for(TextField t : defaultFields){
+            t.setPrefWidth(TEXT_FIELD_WIDTH);
+        }
+
+        //Add events to grid
+        //Set font to each Text
+        for(int i = 0; i < labels.length; i++){
+            labels[i].setFont(TEXT_FONT);
+
+            gridPane.add(labels[i], 0, i);
+            gridPane.add(defaultFields[i], 1, i);
+        }
+
+        return gridPane;
+    }
+
+    /**
+     * Buttons for add event form.
+     */
+    private HBox addMemberButtonPanel(){
+        HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        buttonPanel.setAlignment(Pos.CENTER);
+
+        //Set the padding around the button panel
+        buttonPanel.setPadding(new Insets(10));
+
+        //Set the gaps between buttons
+        buttonPanel.setSpacing(60);
+
+        //Create some default buttons for now
+        Button cancelButton = new Button("Cancel");
+        Button saveButton = new Button("Add Member");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+
+        cancelButton.setOnAction((ActionEvent e) -> {
+            borderPane.setCenter(directoryPane());
+            borderPane.setBottom(directoryButtonPanel());
+        });
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            DirectoryMember newMember = new DirectoryMember(
+                    dirNameField.getText(),
+                    dirJobTitleField.getText(),
+                    dirAddressField.getText(),
+                    dirPhoneNumField.getText()
+            );
+            dirMgmt.addMember(newMember);
+
+            borderPane.setCenter(directoryPane());
+            borderPane.setBottom(directoryButtonPanel());
+        });
+
+        //Add the buttons to the hbox
+        buttonPanel.getChildren().addAll(cancelButton, saveButton);
+
+        return buttonPanel;
+    }
+
+
+    /**
+     * Create a form using a grid pane.
+     */
+    private GridPane editDirectoryForm(DirectoryMember member){
+        GridPane gridPane = new GridPane();
+        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        gridPane.setHgap(FORM_HGAP);
+        gridPane.setVgap(FORM_VGAP);
+        gridPane.setPadding(CENTER_INSETS);
+
+        //Lables for each field
+        Label[] labels = new Label[]{
+                new Label("Name:"),
+                new Label("Job Title:"),
+                new Label("Home Address:"),
+                new Label("Phone Number:")
         };
+
+        dirNameField = new TextField(member.getName());
+        dirJobTitleField = new TextField(member.getJobTitle());
+        dirAddressField = new TextField(member.getAddress());
+        dirPhoneNumField = new TextField(member.getPhoneNumber());
+
+        TextField[] defaultFields = new TextField[]{dirNameField, dirJobTitleField, dirAddressField, dirPhoneNumField};
+
 
         for(TextField t : defaultFields){
             t.setPrefWidth(TEXT_FIELD_WIDTH);
@@ -447,6 +549,13 @@ public class TeamOwnerGUI extends Application{
         });
 
         saveButton.setOnAction((ActionEvent e) -> {
+            DirectoryMember updatedMem = directory.get(editingIndex);
+            updatedMem.setName(dirNameField.getText());
+            updatedMem.setJobTitle(dirJobTitleField.getText());
+            updatedMem.setAddress(dirAddressField.getText());
+            updatedMem.setPhoneNumber(dirPhoneNumField.getText());
+            dirMgmt.updateDirectory(directory);
+
             borderPane.setCenter(directoryPane());
             borderPane.setBottom(directoryButtonPanel());
         });
@@ -472,7 +581,7 @@ public class TeamOwnerGUI extends Application{
         gridPane.setPadding(CENTER_INSETS);
 
         //There is at least one event
-        if(eventList != null) {
+        if(eventList.size() > 0) {
             //Event for each button press -> go to edit form page for event
             //Retrieve the TeamEvent that was pressed by getting button id, which directly maps to the index
             //in eventList for the event
@@ -625,6 +734,211 @@ public class TeamOwnerGUI extends Application{
     }
 
     /**
+     * Create a form for adding a new event
+     */
+    private GridPane addEventForm(){
+        GridPane gridPane = new GridPane();
+        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        gridPane.setHgap(FORM_HGAP);
+        gridPane.setVgap(FORM_VGAP);
+        gridPane.setPadding(CENTER_INSETS);
+
+        //Lables for each field
+        Label[] labels = new Label[]{
+                new Label("Event Name:"),
+                new Label("Speedway:"),
+                new Label("Location:")
+        };
+
+        //Set font to each label
+        for(Label l : labels){
+            l.setFont(TEXT_FONT);
+        }
+
+        //Assign TextFields
+        eventTitleField = new TextField();
+        eventSpeedwayField = new TextField();
+        eventLocationField = new TextField();
+        eventDetailsField = new TextField();
+
+        //Each field with default text already in directory (dummy text for now)
+        //For first 3 fields in form
+        TextField[] defaultFields = new TextField[]{eventTitleField, eventSpeedwayField, eventLocationField};
+
+        for(TextField t : defaultFields){
+            t.setPrefWidth(TEXT_FIELD_WIDTH);
+        }
+
+        //Make choice box for date (month)
+        final ChoiceBox monthBox = new ChoiceBox(FXCollections.observableArrayList("January", "February", "March",
+                "April", "May", "June", "July", "August", "September", "October",
+                "November", "December"));
+        monthBox.getSelectionModel().selectFirst();
+        eventMonth = 1;
+
+        ChoiceBox dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                "24", "25", "26", "27", "28", "29", "30", "31"));
+        dayBox.getSelectionModel().selectFirst();
+        eventDay = 1;
+
+        monthBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                eventMonth = newValue.intValue() + 1;
+                ChoiceBox dayBox;
+                if(eventMonth == 2){
+                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                            "24", "25", "26", "27", "28"));
+                }else if(eventMonth == 4 || eventMonth == 6 || eventMonth == 9 || eventMonth == 11){
+                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                            "24", "25", "26", "27", "28", "29", "30"));
+                }else{
+                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
+                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                            "24", "25", "26", "27", "28", "29", "30", "31"));
+                }
+                dayBox.getSelectionModel().selectFirst();
+                dayBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                        eventDay = newValue.intValue() + 1;
+                    }
+                });
+                HBox hBox = new HBox();
+                hBox.setSpacing(20);
+                hBox.getChildren().addAll(monthBox, dayBox);
+                gridPane.add(hBox, 1, 3);
+            }
+        });
+
+        //Create choice boxes for time selection (hour/minute)
+        ChoiceBox hourBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5","6","7", "8",
+                "9", "10", "11", "12"));
+        ChoiceBox minuteBox = new ChoiceBox(FXCollections.observableArrayList("00", "05", "10", "15", "20", "25", "30", "35",
+                "40", "45", "50", "55"));
+
+        ChoiceBox AMPMBox = new ChoiceBox(FXCollections.observableArrayList("AM", "PM"));
+
+
+        hourBox.getSelectionModel().selectFirst();
+        eventHour = 1;
+        minuteBox.getSelectionModel().selectFirst();
+        eventMinute = 0;
+        AMPMBox.getSelectionModel().selectFirst();
+        eventAMPM = "AM";
+
+        hourBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                eventHour = newValue.intValue();
+            }
+        });
+
+        minuteBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                eventMinute = newValue.intValue() * 5;  //convert index to minutes which are increments of 5
+            }
+        });
+
+        AMPMBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                if(newValue.intValue() == 0)
+                    eventAMPM = "AM";
+                else
+                    eventAMPM = "PM";
+            }
+        });
+
+
+        //Add events to grid, Labels[] takes care of first 3 fields
+        //Set font to each Text
+        for(int i = 0; i <= 5; i++){
+            if(i == 3){//row for date choicebox
+                Label dateLabel = new Label("Date:");
+                dateLabel.setFont(TEXT_FONT);
+                gridPane.add(dateLabel, 0, i);
+                HBox hBox = new HBox();
+                hBox.setSpacing(20);
+                hBox.getChildren().addAll(monthBox, dayBox);
+                gridPane.add(hBox, 1, i);
+            }else if(i == 4){
+                Label timeLabel = new Label("Time:");
+                timeLabel.setFont(TEXT_FONT);
+                gridPane.add(timeLabel, 0, i);
+                HBox hBox = new HBox();
+                hBox.setSpacing(10);
+                Label colon = new Label(":");
+                hBox.getChildren().addAll(hourBox, colon, minuteBox, AMPMBox);
+                gridPane.add(hBox, 1, i);
+            }else if(i == 5){
+                Label details = new Label("Details:");
+                details.setFont(TEXT_FONT);
+                gridPane.add(details, 0, i);
+                gridPane.add(eventDetailsField, 1, i);
+            }else {
+                labels[i].setFont(TEXT_FONT);
+                gridPane.add(labels[i], 0, i);
+                gridPane.add(defaultFields[i], 1, i);
+            }
+        }
+        return gridPane;
+    }
+
+    /**
+     * Buttons for add event form.
+     */
+    private HBox addEventButtonPanel(){
+        HBox buttonPanel = new HBox();
+        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        buttonPanel.setAlignment(Pos.CENTER);
+
+        //Set the padding around the button panel
+        buttonPanel.setPadding(new Insets(10));
+
+        //Set the gaps between buttons
+        buttonPanel.setSpacing(60);
+
+        //Create some default buttons for now
+        Button cancelButton = new Button("Cancel");
+        Button saveButton = new Button("Add Event");
+
+        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+
+        cancelButton.setOnAction((ActionEvent e) -> {
+            borderPane.setCenter(eventSchedulePane());
+            borderPane.setBottom(eventScheduleButtonPanel());
+        });
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            //Save the event in  the event list
+            TeamEvent newEvent = new TeamEvent();
+            newEvent.setTitle(eventTitleField.getText());
+            newEvent.setSpeedway(eventSpeedwayField.getText());
+            newEvent.setLocation(eventLocationField.getText());
+            newEvent.setDate(eventMonth, eventDay);
+            newEvent.setTime(eventHour, eventMinute, eventAMPM);
+            newEvent.setDetails(eventDetailsField.getText());
+
+            eventMgmt.addEvent(newEvent);
+
+            borderPane.setCenter(eventSchedulePane());
+            borderPane.setBottom(eventScheduleButtonPanel());
+        });
+
+        //Add the buttons to the hbox
+        buttonPanel.getChildren().addAll(cancelButton, saveButton);
+
+        return buttonPanel;
+    }
+
+    /**
      * Create a grid pane showing event detials, allowing user to edit them.
      * ID of button is passed in, this is the array index of the event list that this event will correspond to.
      */
@@ -722,7 +1036,7 @@ public class TeamOwnerGUI extends Application{
 
 
         hourBox.getSelectionModel().select(eventHour);
-        minuteBox.getSelectionModel().select(eventMinute);
+        minuteBox.getSelectionModel().select(eventMinute/5);//convert from minutes to index by dividing by 5
         AMPMBox.getSelectionModel().select(eventAMPM);
 
         hourBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
@@ -735,7 +1049,7 @@ public class TeamOwnerGUI extends Application{
         minuteBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                eventMinute = newValue.intValue();
+                eventMinute = newValue.intValue() * 5;  //convert index to minutes which are increments of 5;
             }
         });
 
@@ -812,14 +1126,13 @@ public class TeamOwnerGUI extends Application{
 
         saveButton.setOnAction((ActionEvent e) -> {
             //Save the event in  the event list, replacing the old one
-            TeamEvent updatedEvent = new TeamEvent();
+            TeamEvent updatedEvent = eventList.get(editingIndex);
             updatedEvent.setTitle(eventTitleField.getText());
             updatedEvent.setSpeedway(eventSpeedwayField.getText());
             updatedEvent.setLocation(eventLocationField.getText());
             updatedEvent.setDate(eventMonth, eventDay);
             updatedEvent.setTime(eventHour, eventMinute, eventAMPM);
             updatedEvent.setDetails(eventDetailsField.getText());
-            eventList.set(editingIndex, updatedEvent);
 
             //Update the modified list with event management
             eventMgmt.updateEventList(eventList);
@@ -1013,297 +1326,6 @@ public class TeamOwnerGUI extends Application{
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
         return scrollPane;
-    }
-
-    /**
-     * Create a form for adding a new event
-     */
-    private GridPane addEventForm(){
-        GridPane gridPane = new GridPane();
-        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
-                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-        gridPane.setHgap(FORM_HGAP);
-        gridPane.setVgap(FORM_VGAP);
-        gridPane.setPadding(CENTER_INSETS);
-
-        //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Event Name:"),
-                new Label("Speedway:"),
-                new Label("Location:")
-        };
-
-        //Set font to each label
-        for(Label l : labels){
-            l.setFont(TEXT_FONT);
-        }
-
-        //Assign TextFields
-        eventTitleField = new TextField();
-        eventSpeedwayField = new TextField();
-        eventLocationField = new TextField();
-        eventDetailsField = new TextField();
-
-        //Each field with default text already in directory (dummy text for now)
-        //For first 3 fields in form
-        TextField[] defaultFields = new TextField[]{eventTitleField, eventSpeedwayField, eventLocationField};
-
-        for(TextField t : defaultFields){
-            t.setPrefWidth(TEXT_FIELD_WIDTH);
-        }
-
-        //Make choice box for date (month)
-        final ChoiceBox monthBox = new ChoiceBox(FXCollections.observableArrayList("January", "February", "March",
-                                        "April", "May", "June", "July", "August", "September", "October",
-                                        "November", "December"));
-        monthBox.getSelectionModel().selectFirst();
-        eventMonth = 1;
-
-        ChoiceBox dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
-                "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
-                "24", "25", "26", "27", "28", "29", "30", "31"));
-        dayBox.getSelectionModel().selectFirst();
-        eventDay = 1;
-
-        monthBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                eventMonth = newValue.intValue() + 1;
-                ChoiceBox dayBox;
-                if(eventMonth == 2){
-                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
-                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
-                            "24", "25", "26", "27", "28"));
-                }else if(eventMonth == 4 || eventMonth == 6 || eventMonth == 9 || eventMonth == 11){
-                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
-                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
-                            "24", "25", "26", "27", "28", "29", "30"));
-                }else{
-                    dayBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5", "6", "7",
-                            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23",
-                            "24", "25", "26", "27", "28", "29", "30", "31"));
-                }
-                dayBox.getSelectionModel().selectFirst();
-                dayBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                        eventDay = newValue.intValue() + 1;
-                    }
-                });
-                HBox hBox = new HBox();
-                hBox.setSpacing(20);
-                hBox.getChildren().addAll(monthBox, dayBox);
-                gridPane.add(hBox, 1, 3);
-            }
-        });
-
-        //Create choice boxes for time selection (hour/minute)
-        ChoiceBox hourBox = new ChoiceBox(FXCollections.observableArrayList("1", "2", "3", "4", "5","6","7", "8",
-                                                                            "9", "10", "11", "12"));
-        ChoiceBox minuteBox = new ChoiceBox(FXCollections.observableArrayList("00", "05", "10", "15", "20", "25", "30", "35",
-                                                                               "40", "45", "50", "55"));
-
-        ChoiceBox AMPMBox = new ChoiceBox(FXCollections.observableArrayList("AM", "PM"));
-
-
-        hourBox.getSelectionModel().selectFirst();
-        eventHour = 1;
-        minuteBox.getSelectionModel().selectFirst();
-        eventMinute = 0;
-        AMPMBox.getSelectionModel().selectFirst();
-        eventAMPM = "AM";
-
-        hourBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                eventHour = newValue.intValue();
-            }
-        });
-
-        minuteBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                eventMinute = newValue.intValue();
-            }
-        });
-
-        AMPMBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if(newValue.intValue() == 0)
-                    eventAMPM = "AM";
-                else
-                    eventAMPM = "PM";
-            }
-        });
-
-
-        //Add events to grid, Labels[] takes care of first 3 fields
-        //Set font to each Text
-        for(int i = 0; i <= 5; i++){
-            if(i == 3){//row for date choicebox
-                Label dateLabel = new Label("Date:");
-                dateLabel.setFont(TEXT_FONT);
-                gridPane.add(dateLabel, 0, i);
-                HBox hBox = new HBox();
-                hBox.setSpacing(20);
-                hBox.getChildren().addAll(monthBox, dayBox);
-                gridPane.add(hBox, 1, i);
-            }else if(i == 4){
-                Label timeLabel = new Label("Time:");
-                timeLabel.setFont(TEXT_FONT);
-                gridPane.add(timeLabel, 0, i);
-                HBox hBox = new HBox();
-                hBox.setSpacing(10);
-                Label colon = new Label(":");
-                hBox.getChildren().addAll(hourBox, colon, minuteBox, AMPMBox);
-                gridPane.add(hBox, 1, i);
-            }else if(i == 5){
-                Label details = new Label("Details:");
-                details.setFont(TEXT_FONT);
-                gridPane.add(details, 0, i);
-                gridPane.add(eventDetailsField, 1, i);
-            }else {
-                labels[i].setFont(TEXT_FONT);
-                gridPane.add(labels[i], 0, i);
-                gridPane.add(defaultFields[i], 1, i);
-            }
-        }
-        return gridPane;
-    }
-
-    /**
-     * Buttons for add event form.
-     */
-    private HBox addEventButtonPanel(){
-        HBox buttonPanel = new HBox();
-        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        buttonPanel.setAlignment(Pos.CENTER);
-
-        //Set the padding around the button panel
-        buttonPanel.setPadding(new Insets(10));
-
-        //Set the gaps between buttons
-        buttonPanel.setSpacing(60);
-
-        //Create some default buttons for now
-        Button cancelButton = new Button("Cancel");
-        Button saveButton = new Button("Add Event");
-
-        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
-        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
-
-        cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(eventSchedulePane());
-            borderPane.setBottom(eventScheduleButtonPanel());
-        });
-
-        saveButton.setOnAction((ActionEvent e) -> {
-            //Save the event in  the event list
-            TeamEvent newEvent = new TeamEvent();
-            newEvent.setTitle(eventTitleField.getText());
-            newEvent.setSpeedway(eventSpeedwayField.getText());
-            newEvent.setLocation(eventLocationField.getText());
-            newEvent.setDate(eventMonth, eventDay);
-            newEvent.setTime(eventHour, eventMinute, eventAMPM);
-            newEvent.setDetails(eventDetailsField.getText());
-            eventList.add(newEvent);
-
-            //Update the modified list with event management
-            eventMgmt.updateEventList(eventList);
-
-            borderPane.setCenter(eventSchedulePane());
-            borderPane.setBottom(eventScheduleButtonPanel());
-        });
-
-        //Add the buttons to the hbox
-        buttonPanel.getChildren().addAll(cancelButton, saveButton);
-
-        return buttonPanel;
-    }
-
-    /**
-     * Create a form for adding a new event
-     */
-    private GridPane addMemberForm(){
-        GridPane gridPane = new GridPane();
-        gridPane.setBorder(new Border(new BorderStroke(Color.BLACK,
-                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-        gridPane.setHgap(FORM_HGAP);
-        gridPane.setVgap(FORM_VGAP);
-        gridPane.setPadding(CENTER_INSETS);
-
-        //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Name:"),
-                new Label("Job Title:"),
-                new Label("Home Address:"),
-                new Label("Phone Number:")
-        };
-
-        //Set font to each label
-        for(Label l : labels){
-            l.setFont(TEXT_FONT);
-        }
-
-        TextField[] defaultFields = new TextField[]{
-                new TextField(),
-                new TextField(),
-                new TextField(),
-                new TextField()
-        };
-
-        for(TextField t : defaultFields){
-            t.setPrefWidth(TEXT_FIELD_WIDTH);
-        }
-
-        //Add events to grid
-        //Set font to each Text
-        for(int i = 0; i < labels.length; i++){
-            labels[i].setFont(TEXT_FONT);
-
-            gridPane.add(labels[i], 0, i);
-            gridPane.add(defaultFields[i], 1, i);
-        }
-
-        return gridPane;
-    }
-
-    /**
-     * Buttons for add event form.
-     */
-    private HBox addMemberButtonPanel(){
-        HBox buttonPanel = new HBox();
-        buttonPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        buttonPanel.setAlignment(Pos.CENTER);
-
-        //Set the padding around the button panel
-        buttonPanel.setPadding(new Insets(10));
-
-        //Set the gaps between buttons
-        buttonPanel.setSpacing(60);
-
-        //Create some default buttons for now
-        Button cancelButton = new Button("Cancel");
-        Button saveButton = new Button("Add Member");
-
-        cancelButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
-        saveButton.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
-
-        cancelButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(directoryPane());
-            borderPane.setBottom(directoryButtonPanel());
-        });
-
-        saveButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(directoryPane());
-            borderPane.setBottom(directoryButtonPanel());
-        });
-
-        //Add the buttons to the hbox
-        buttonPanel.getChildren().addAll(cancelButton, saveButton);
-
-        return buttonPanel;
     }
 
     /**

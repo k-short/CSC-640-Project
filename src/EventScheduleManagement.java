@@ -12,7 +12,11 @@ public class EventScheduleManagement {
      */
     public EventScheduleManagement(){
         eventAccess = new EventAccess();
-        eventList = eventAccess.getEvents();
+
+        if(eventAccess.getEvents() != null)
+            eventList = eventAccess.getEvents();
+        else
+            eventList = new ArrayList<>();
     }
 
     /**
