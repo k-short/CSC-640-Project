@@ -6,7 +6,7 @@ import java.util.ArrayList;
  */
 public class DirectoryAccess {
     /**
-     * Insert an event into the event collection.
+     * Insert a member into the directory collection.
      */
     public void saveDirectory(ArrayList<DirectoryMember> directory){
         try {
@@ -22,8 +22,8 @@ public class DirectoryAccess {
     }
 
     /**
-     * Get a list of all events in the event collection.
-     * @return Events in an ArrayList (not sorted)
+     * Get a list of all members in the directory collection.
+     * @return Members in an ArrayList (not sorted)
      */
     public ArrayList<DirectoryMember> getDirectory(){
         ArrayList<DirectoryMember> dir = null;
