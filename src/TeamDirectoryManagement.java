@@ -8,7 +8,7 @@ public class TeamDirectoryManagement {
     DirectoryAccess directoryAccess;
 
     /**
-     * Constructor that creates the EventAccess object and retrieves event list from it.
+     * Constructor that creates the DirectoryAcceess object and retrieves event list from it.
      */
     public TeamDirectoryManagement(){
         directoryAccess = new DirectoryAccess();
@@ -20,8 +20,7 @@ public class TeamDirectoryManagement {
     }
 
     /**
-     * Return the list of events after sorting them in reverse-chronological order.
-     * @return ArrayList of all events.
+     * Return the list of members after sorting them in by name.
      */
     public ArrayList<DirectoryMember> getDirectory(){
         // sortEventList();
@@ -30,14 +29,14 @@ public class TeamDirectoryManagement {
 
 
     /**
-     * Sort the events in the event list by reverse-chronological order.
+     * Sort the members in the event list by name.
      */
     private void sortDirectory(){
         //sort
     }
 
     /**
-     * Add a new event to the event array.
+     * Add a new member to the directory array.
      */
     public void addMember(DirectoryMember member){
         directory.add(member);
@@ -47,7 +46,7 @@ public class TeamDirectoryManagement {
     }
 
     /**
-     * Update the event list
+     * Update the directory list
      */
     public void updateDirectory(ArrayList<DirectoryMember> dir){
         directoryAccess.saveDirectory(dir);

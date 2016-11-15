@@ -5,9 +5,9 @@ import java.util.Date;
  * Created by ken12_000 on 11/11/2016.
  */
 public class Transaction implements Serializable {
-    private int amount;
+    private Double amount;
     private String type;
-    private int remainingFunds;
+    private Double remainingFunds;
     private Date date;
 
     public Date getDate() {
@@ -18,11 +18,11 @@ public class Transaction implements Serializable {
         this.date = date;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 
@@ -34,11 +34,11 @@ public class Transaction implements Serializable {
         this.type = type;
     }
 
-    public int getRemainingFunds() {
+    public double getRemainingFunds() {
         return remainingFunds;
     }
 
-    public void setRemainingFunds(int remainingFunds) {
+    public void setRemainingFunds(Double remainingFunds) {
         this.remainingFunds = remainingFunds;
     }
 }

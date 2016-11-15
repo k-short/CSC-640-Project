@@ -5,6 +5,7 @@ import javafx.application.Application;
  */
 public class TeamOwnerDemo {
     public static void main(String[] args) {
-        Application.launch(TeamOwnerGUI.class, args);
+       // Application.launch(TeamOwnerGUI.class, args);
+        Application.launch(LoginGUI.class, args);
     }
 }

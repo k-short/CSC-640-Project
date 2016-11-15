@@ -24,7 +24,7 @@ public class FundAccess {
     /**
      * Update the available funds record
      */
-    public void saveFunds(Integer amount){
+    public void saveFunds(Double amount){
         try {
             FileOutputStream fileOut =
                     new FileOutputStream("total_funds.ser");
@@ -64,21 +64,21 @@ public class FundAccess {
     /**
      * Get the amount of total funds available.
      */
-    public Integer getFunds(){
-        Integer amount = null;
+    public Double getFunds(){
+        Double amount = 0.0;
         File file = new File("total_funds.ser");
         try {
             if(file.exists()) {
                 FileInputStream fileIn = new FileInputStream("total_funds.ser");
                 ObjectInputStream in = new ObjectInputStream(fileIn);
-                amount = (Integer) in.readObject();
+                amount = (Double) in.readObject();
                 in.close();
                 fileIn.close();
             }
         }catch(IOException i) {
             i.printStackTrace();
         }catch(ClassNotFoundException c) {
-            System.out.println("Integer class not found");
+            System.out.println("Double class not found");
             c.printStackTrace();
         }
 

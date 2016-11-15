@@ -27,7 +27,11 @@ import oracle.jrockit.jfr.StringConstantPool;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by ken12_000 on 10/21/2016.
@@ -46,29 +50,19 @@ public class TeamOwnerGUI extends Application{
     private final int TEXT_FIELD_WIDTH = 250;
     private BorderPane borderPane;
 
-    String dummyTran1 = "Remove:  $600";
-    String dummyRem1 = "$2000";
-    String dummyTran2 = "Add:  $1000";
-    String dummyRem2 = "$3000";
-    String dummyTran3 = "Add:  $7,500";
-    String dummyRem3 = "$10,500";
-    String dummyTran4 = "Remove:  $4,500";
-    String dummyRem4 = "$6000";
-
-    String dummyDate1 = "9/12/2016";
-    String dummyDate2 = "9/30/2016";
-    String dummyDate3 = "10/2/2016";
-    String dummyDate4 = "10/19/2016";
-
     String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
     String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
 
     //Management objects and associated lists
     private EventScheduleManagement eventMgmt = new EventScheduleManagement();
     private TeamDirectoryManagement dirMgmt = new TeamDirectoryManagement();
+    private TeamFundsManagement fundsMgmt = new TeamFundsManagement();
     private ArrayList<TeamEvent> eventList;
     private ArrayList<DirectoryMember> directory;
+    private ArrayList<Transaction> transactions;
+    private Double totalFunds;
 
+    //Text fields to hold information to be added to serialized files
     private TextField eventTitleField;
     private TextField eventSpeedwayField;
     private TextField eventLocationField;
@@ -79,6 +73,10 @@ public class TeamOwnerGUI extends Application{
     private TextField dirAddressField;
     private TextField dirPhoneNumField;
 
+    private TextField addFundsTextField;
+    private TextField removeFundsTextField;
+
+    //Data holders for choice boxes in add/edit event methods.
     private int eventMonth;
     private int eventDay;
     private int eventHour;
@@ -126,16 +124,8 @@ public class TeamOwnerGUI extends Application{
         VBox menu = new VBox();
         menu.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        //Set the padding around the vbox
-        //menu.setPadding(new Insets(10));
-
         //Set the amount of space inbetween menu items
         menu.setSpacing(30);
-
-        //Set the title for the menu
-       /* Text title = new Text("Team Owner");
-        title.setFont(MENU_TITLE_FONT);
-        menu.getChildren().add(title);*/
 
         //Create menu buttons
         Button schedule = new Button("Event Schedule");
@@ -158,8 +148,6 @@ public class TeamOwnerGUI extends Application{
 
         //Add events to buttons for when clicked
         //Changed selected button text to blue, others to black
-        //Set to selected font
-        //Set center to selected button's corresponding info
         schedule.setOnAction((ActionEvent e) -> {
             schedule.setTextFill(Color.BLUE);
             dir.setTextFill(Color.BLACK);
@@ -229,7 +217,6 @@ public class TeamOwnerGUI extends Application{
             VBox.setMargin(menuOptions[i], new Insets(0, 0, 0, 40));
             menu.getChildren().add(menuOptions[i]);
         }
-
         return menu;
     }
 
@@ -1148,6 +1135,121 @@ public class TeamOwnerGUI extends Application{
     }
 
     /**
+     * Create funds VBox displaying available funds and a scrollable log for funds records.
+     * Records will show all previous fund removals and additions, time-stamped.
+     */
+    private VBox fundsPane(){
+        VBox vbox = new VBox();
+        vbox.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+
+        //Set the padding around the vbox
+        vbox.setPadding(CENTER_INSETS);
+
+        //Set the amount of space in between menu items
+        vbox.setSpacing(30);
+
+        //Get total funds
+        totalFunds = fundsMgmt.getFunds();
+
+        //Create funds label
+        String remFunds = NumberFormat.getInstance().format(totalFunds);
+        Label fundsLabel = new Label("Available Funds: $" + remFunds);
+        fundsLabel.setFont(LABEL_FONT);
+
+        //Create funds log (scrollable pane)
+        ScrollPane fundsLog = fundsLog();
+
+        //Add funds label and log to vbox
+        vbox.getChildren().addAll(fundsLabel, fundsLog);
+
+        return vbox;
+    }
+
+    /**
+     * Create a grid pane to hold transaction records.
+     * Newest transition at top of grid pane.
+     * Put the grid pane in a scroll pane.
+     * Return the scroll pane.
+     */
+    private ScrollPane fundsLog(){
+        //Grid pane to hold transactions
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(60);
+        gridPane.setVgap(30);
+        gridPane.setPadding(CENTER_INSETS);
+
+        //Get transactions
+        transactions = fundsMgmt.getTransactions();
+
+        if(transactions.size() > 0) {
+            //Create funds log label
+            Label fundsLogLabel = new Label("Previous Transactions");
+            fundsLogLabel.setFont(LABEL_FONT);
+
+            //Labels for grid pane
+            Label dateLabel = new Label("Date and Time");
+            dateLabel.setFont(TEXT_FONT);
+            dateLabel.setUnderline(true);
+
+            Label transactionLabel = new Label("Transaction");
+            transactionLabel.setFont(TEXT_FONT);
+            transactionLabel.setUnderline(true);
+
+            Label remainingLabel = new Label("Funds Remaining");
+            remainingLabel.setFont(TEXT_FONT);
+            remainingLabel.setUnderline(true);
+
+            //Array of dates as string right now
+            Text[] date = new Text[transactions.size()];
+            for(int i = 0; i < date.length; i++){
+                DateFormat dateFormatD = new SimpleDateFormat("MMM dd, yyyy");
+                DateFormat dateFormatT = new SimpleDateFormat("hh:mm:ss aa");
+                Date tranDate = transactions.get(i).getDate();
+                date[i] = new Text(dateFormatD.format(tranDate) + "  at  " + dateFormatT.format(tranDate));
+            }
+
+
+            //Array of transactions as Texts
+            Text[] transaction = new Text[transactions.size()];
+            for(int i = 0; i < transaction.length; i++){
+                String amount = NumberFormat.getInstance().format(transactions.get(i).getAmount());
+                transaction[i] = new Text(transactions.get(i).getType() + ": $" + amount);
+            }
+
+            //Array of remaining funds as Texts
+            Text[] remFund = new Text[transactions.size()];
+            for(int i = 0; i < transaction.length; i++){
+                String amount = NumberFormat.getInstance().format(transactions.get(i).getRemainingFunds());
+                remFund[i] = new Text("$" + amount);
+            }
+
+            //Add the grid pane labels to top of the grid pane
+            gridPane.add(fundsLogLabel, 0, 0, 2, 1);
+            gridPane.add(dateLabel, 0, 1);
+            gridPane.add(transactionLabel, 1, 1);
+            gridPane.add(remainingLabel, 2, 1);
+
+            //Add transactions and remaining funds to grid pane
+            //Set the fonts of each Text
+            for (int i = 0; i < transactions.size(); i++) {
+                date[i].setFont(TEXT_FONT);
+                transaction[i].setFont(TEXT_FONT);
+                remFund[i].setFont(TEXT_FONT);
+
+                gridPane.add(date[i], 0, (i + 2));
+                gridPane.add(transaction[i], 1, (i + 2));
+                gridPane.add(remFund[i], 2, (i + 2));
+            }
+        }
+
+        //Scroll pane to hold grid pane of transactions
+        ScrollPane scrollPane = new ScrollPane(gridPane);
+
+        return scrollPane;
+    }
+
+    /**
      * Create funds overview HBox for buttons to add/remove funds.
      */
     private HBox fundsButtonPanel(){
@@ -1185,165 +1287,6 @@ public class TeamOwnerGUI extends Application{
     }
 
     /**
-     * Create funds VBox displaying available funds and a scrollable log for funds records.
-     * Records will show all previous fund removals and additions, time-stamped.
-     */
-    private VBox fundsPane(){
-        VBox vbox = new VBox();
-        vbox.setBorder(new Border(new BorderStroke(Color.BLACK,
-                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-
-        //Set the padding around the vbox
-        vbox.setPadding(CENTER_INSETS);
-
-        //Set the amount of space in between menu items
-        vbox.setSpacing(30);
-
-        //Create funds label
-        Label fundsLabel = new Label("Available Funds:  $6,000");
-        fundsLabel.setFont(LABEL_FONT);
-
-        //Create funds log (scrollable pane)
-        ScrollPane fundsLog = fundsLog();
-
-        //Add funds label and log to vbox
-        vbox.getChildren().addAll(fundsLabel, fundsLog);
-
-        return vbox;
-    }
-
-    /**
-     * Create a grid pane to hold transaction records.
-     * Newest transition at top of grid pane.
-     * Put the grid pane in a scroll pane.
-     * Return the scroll pane.
-     */
-    private ScrollPane fundsLog(){
-        //Grid pane to hold transactions
-        GridPane gridPane = new GridPane();
-        gridPane.setHgap(60);
-        gridPane.setVgap(30);
-        gridPane.setPadding(CENTER_INSETS);
-        //gridPane.setPadding(new Insets(5, 5, 5, 5));
-
-        //Create funds log label
-        Label fundsLogLabel = new Label("Previous Transactions");
-        fundsLogLabel.setFont(LABEL_FONT);
-
-        //Labels for grid pane
-        Label dateLabel = new Label("Date");
-        dateLabel.setFont(TEXT_FONT);
-        dateLabel.setUnderline(true);
-
-        Label transactionLabel = new Label("Transaction");
-        transactionLabel.setFont(TEXT_FONT);
-        transactionLabel.setUnderline(true);
-
-        Label remainingLabel = new Label("Funds Remaining");
-        remainingLabel.setFont(TEXT_FONT);
-        remainingLabel.setUnderline(true);
-
-        //Array of dates as string right now
-        Text[] dates = new Text[]{
-                new Text(dummyDate4),
-                new Text(dummyDate3),
-                new Text(dummyDate2),
-                new Text(dummyDate1),
-                new Text(dummyDate4),
-                new Text(dummyDate3),
-                new Text(dummyDate2),
-                new Text(dummyDate1),
-                new Text(dummyDate4),
-                new Text(dummyDate3),
-                new Text(dummyDate2),
-                new Text(dummyDate1),
-                new Text(dummyDate4),
-                new Text(dummyDate3),
-                new Text(dummyDate2),
-                new Text(dummyDate1)
-        };
-
-        //Array of transactions as Texts
-        Text[] transactions = new Text[]{
-                new Text(dummyTran4),
-                new Text(dummyTran3),
-                new Text(dummyTran2),
-                new Text(dummyTran1),
-                new Text(dummyTran4),
-                new Text(dummyTran3),
-                new Text(dummyTran2),
-                new Text(dummyTran1),
-                new Text(dummyTran4),
-                new Text(dummyTran3),
-                new Text(dummyTran2),
-                new Text(dummyTran1),
-                new Text(dummyTran4),
-                new Text(dummyTran3),
-                new Text(dummyTran2),
-                new Text(dummyTran1)
-        };
-
-        //Array of remaining funds as Texts
-        Text[] remainingFunds = new Text[]{
-                new Text(dummyRem4),
-                new Text(dummyRem3),
-                new Text(dummyRem2),
-                new Text(dummyRem1),
-                new Text(dummyRem4),
-                new Text(dummyRem3),
-                new Text(dummyRem2),
-                new Text(dummyRem1),
-                new Text(dummyRem4),
-                new Text(dummyRem3),
-                new Text(dummyRem2),
-                new Text(dummyRem1),
-                new Text(dummyRem1),
-                new Text(dummyRem4),
-                new Text(dummyRem3),
-                new Text(dummyRem2),
-                new Text(dummyRem1)
-        };
-
-        //Add the grid pane labels to top of the grid pane
-        gridPane.add(fundsLogLabel, 0, 0, 2, 1);
-        gridPane.add(dateLabel, 0, 1);
-        gridPane.add(transactionLabel, 1, 1);
-        gridPane.add(remainingLabel, 2, 1);
-
-        //Add transactions and remaining funds to grid pane
-        //Set the fonts of each Text
-        for(int i = 0; i < transactions.length; i++){
-            dates[i].setFont(TEXT_FONT);
-            transactions[i].setFont(TEXT_FONT);
-            remainingFunds[i].setFont(TEXT_FONT);
-
-            gridPane.add(dates[i], 0, (i + 2));
-            gridPane.add(transactions[i], 1, (i + 2));
-            gridPane.add(remainingFunds[i], 2, (i + 2));
-        }
-
-        //Scroll pane to hold grid pane of transactions
-        ScrollPane scrollPane = new ScrollPane(gridPane);
-
-        return scrollPane;
-    }
-
-    /**
-     * HBox for top.
-     */
-    private HBox topHBox(){
-        HBox hBox = new HBox();
-        hBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-
-        Label label = new Label("Team Owner");
-        label.setFont(MENU_TITLE_FONT);
-        hBox.getChildren().add(label);
-        hBox.setPadding(new Insets(20, 20, 20 ,20));
-
-        return hBox;
-    }
-
-    /**
      * Add funds form.
      */
     private VBox addFundsForm(){
@@ -1356,16 +1299,17 @@ public class TeamOwnerGUI extends Application{
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
 
-        Label remainingFunds = new Label("Available Funds:  $6,000");
+        String remFunds = NumberFormat.getInstance().format(totalFunds);
+        Label remainingFunds = new Label("Available Funds: $"+ remFunds );
         remainingFunds.setFont(LABEL_FONT);
 
         Label addLabel = new Label("Add amount:");
         addLabel.setFont(TEXT_FONT);
 
-        TextField addField = new TextField();
+        addFundsTextField = new TextField();
 
         gridPane.add(addLabel, 0, 1);
-        gridPane.add(addField, 1, 1);
+        gridPane.add(addFundsTextField, 1, 1);
 
         vBox.getChildren().addAll(remainingFunds, gridPane);
 
@@ -1385,16 +1329,17 @@ public class TeamOwnerGUI extends Application{
         gridPane.setHgap(FORM_HGAP);
         gridPane.setVgap(FORM_VGAP);
 
-        Label remainingFunds = new Label("Available Funds:  $6,000");
+        String remFunds = NumberFormat.getInstance().format(totalFunds);
+        Label remainingFunds = new Label("Available Funds: $" + remFunds);
         remainingFunds.setFont(LABEL_FONT);
 
         Label addLabel = new Label("Remove amount:");
         addLabel.setFont(TEXT_FONT);
 
-        TextField addField = new TextField();
+        removeFundsTextField = new TextField();
 
         gridPane.add(addLabel, 0, 1);
-        gridPane.add(addField, 1, 1);
+        gridPane.add(removeFundsTextField, 1, 1);
 
         vBox.getChildren().addAll(remainingFunds, gridPane);
 
@@ -1428,6 +1373,21 @@ public class TeamOwnerGUI extends Application{
         });
 
         submitButton.setOnAction((ActionEvent e) -> {
+            Double amount = Double.parseDouble(addFundsTextField.getText());
+
+            //Update total funds
+            Double newTotalFunds = totalFunds + amount;
+            fundsMgmt.updateFunds(newTotalFunds);
+
+            //Create new transaction and add it to the funds log
+            Transaction newTrans = new Transaction();
+            newTrans.setAmount(amount);
+            newTrans.setType("Added");
+            newTrans.setRemainingFunds(newTotalFunds);
+            newTrans.setDate(new Date());
+
+            fundsMgmt.addTransaction(newTrans);
+
             borderPane.setCenter(fundsPane());
             borderPane.setBottom(fundsButtonPanel());
         });
@@ -1465,6 +1425,21 @@ public class TeamOwnerGUI extends Application{
         });
 
         submitButton.setOnAction((ActionEvent e) -> {
+            Double amount = Double.parseDouble(removeFundsTextField.getText());
+
+            //Update total funds
+            Double newTotalFunds = totalFunds - amount;
+            fundsMgmt.updateFunds(newTotalFunds);
+
+            //Create new transaction and add it to the funds log
+            Transaction newTrans = new Transaction();
+            newTrans.setAmount(amount);
+            newTrans.setType("Removed");
+            newTrans.setRemainingFunds(newTotalFunds);
+            newTrans.setDate(new Date());
+
+            fundsMgmt.addTransaction(newTrans);
+
             borderPane.setCenter(fundsPane());
             borderPane.setBottom(fundsButtonPanel());
         });
@@ -1550,5 +1525,21 @@ public class TeamOwnerGUI extends Application{
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         return scrollPane;
+    }
+
+
+    /**
+     * HBox for top.
+     */
+    private HBox topHBox(){
+        HBox hBox = new HBox();
+        hBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        Label label = new Label("Team Owner");
+        label.setFont(MENU_TITLE_FONT);
+        hBox.getChildren().add(label);
+        hBox.setPadding(new Insets(20, 20, 20 ,20));
+
+        return hBox;
     }
 }
