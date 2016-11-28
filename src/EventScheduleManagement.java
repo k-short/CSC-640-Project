@@ -24,7 +24,6 @@ public class EventScheduleManagement {
      * @return ArrayList of all events.
      */
     public ArrayList<TeamEvent> getEventList(){
-       // sortEventList();
         return eventList;
     }
 
@@ -33,17 +32,19 @@ public class EventScheduleManagement {
      * Sort the events in the event list by reverse-chronological order.
      */
     private void sortEventList(){
-        //eventList.sort();
-    }
-
-    /**
-     * Add a new event to the event array.
-     */
-    public void addEvent(TeamEvent event){
-        eventList.add(event);
-
-        //Rewrites the event list array to the file
-        eventAccess.saveEvents(eventList);
+        //insertion sort
+        for(int i = 1; i < eventList.size(); i++){
+            TeamEvent key = eventList.get(i);
+            String keyDate = "" + key.getYear() + key.getMonth() + key.getDay();
+            int k = i - 1;
+            TeamEvent kEvent = eventList.get(k);
+            String kDate =  "" + kEvent.getYear() + kEvent.getMonth() + kEvent.getDay();
+            while(k >= 0 && kDate.compareToIgnoreCase(keyDate) > 0){
+                eventList.set(k + 1, eventList.get(k));
+                k--;
+            }
+            eventList.set(k + 1, key);
+        }
     }
 
     /**

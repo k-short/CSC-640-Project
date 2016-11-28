@@ -46,7 +46,7 @@ public class TeamFundsManagement {
      * Add a new transaction to the funds log.
      */
     public void addTransaction(Transaction transaction){
-        transactions.add(transaction);
+        transactions.add(0, transaction);
 
         //Rewrites the event list array to the file
         fundAccess.saveTransactions(transactions);

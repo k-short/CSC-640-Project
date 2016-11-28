@@ -9,19 +9,19 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
  * Created by ken12_000 on 11/12/2016.
  */
 public class LoginGUI extends Application {
-    private int selectedUser = -1; //no user selected yet, 0 for owner, 1 for crew chief
+    private int selectedUser = 0; //Starts off on owner
     private final String SELECT_USER_MSG = "Please select a user to proceed.";
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        BorderPane borderPane = new BorderPane();
-        borderPane.setPadding(new Insets(50, 50, 50, 50));
+        VBox vBox = new VBox();
 
         ChoiceBox choiceBox = new ChoiceBox(FXCollections.observableArrayList("Team Owner", "Crew Chief"));
 
@@ -40,21 +40,24 @@ public class LoginGUI extends Application {
         Button loginButton = new Button("Login");
         loginButton.setOnAction((ActionEvent e) -> {
             if(selectedUser == 0){
-                //go to team owner interface
+                Stage curStage = new TeamOwnerGUI();
+                curStage.show();
+                primaryStage.close();
             }else if(selectedUser == 1){
                 //go to crew chief interface
-            }else{
-                //present message to user: "please select a user"
             }
         });
 
-        //Add compnents to the border pane
-        borderPane.setCenter(choiceBox);
-        borderPane.setBottom(loginButton);
+        choiceBox.setMaxWidth(Double.MAX_VALUE);
+        loginButton.setMaxWidth(Double.MAX_VALUE);
+
+        vBox.setSpacing(30);
+        vBox.setPadding(new Insets(150, 150, 150, 150));
+        vBox.getChildren().addAll(choiceBox, loginButton);
 
         //create the scene and add it to the stage
         //Create and show scene
-        Scene scene = new Scene(borderPane);
+        Scene scene = new Scene(vBox);
         primaryStage.setScene(scene);
         primaryStage.setTitle("User Login");
         //primaryStage.setMaximized(true);

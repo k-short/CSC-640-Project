@@ -32,17 +32,17 @@ public class TeamDirectoryManagement {
      * Sort the members in the event list by name.
      */
     private void sortDirectory(){
-        //sort
-    }
-
-    /**
-     * Add a new member to the directory array.
-     */
-    public void addMember(DirectoryMember member){
-        directory.add(member);
-
-        //Rewrites the event list array to the file
-        directoryAccess.saveDirectory(directory);
+        //Insertion sort
+        for(int i = 1; i < directory.size(); i++){
+            DirectoryMember key = directory.get(i);
+            String name = key.getName();
+            int k = i - 1;
+            while(k >= 0 && directory.get(k).getName().compareToIgnoreCase(name) > 0){
+                directory.set(k + 1, directory.get(k));
+                k--;
+            }
+            directory.set(k + 1, key);
+        }
     }
 
     /**

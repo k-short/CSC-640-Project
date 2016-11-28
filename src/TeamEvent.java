@@ -12,6 +12,12 @@ public class TeamEvent implements Serializable{
     private String details;
     private int month;
     private int day;
+    private int year;
+
+    public int getYear() {
+        return year;
+    }
+
     private int hour;
     private int minute;
     private String AMPM;
@@ -69,8 +75,7 @@ public class TeamEvent implements Serializable{
         this.month = month;
         this.day = day;
 
-        int year;
-        if(month == 11 || month == 12)
+        if((month == 11 && day > 28) || month == 12)
             year = 2016;
         else
             year = 2017;

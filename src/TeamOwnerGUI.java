@@ -31,12 +31,13 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
  * Created by ken12_000 on 10/21/2016.
  */
-public class TeamOwnerGUI extends Application{
+public class TeamOwnerGUI extends Stage{
     private final Font MENU_TITLE_FONT = Font.font("Arial", FontWeight.BOLD, 20);
     private final Font MENU_OPTION_FONT_UNSEL = Font.font("Arial", FontWeight.NORMAL, 18);
     private final Font MENU_OPTION_FONT_SEL = Font.font("Arial", FontWeight.BOLD, 18);
@@ -86,8 +87,7 @@ public class TeamOwnerGUI extends Application{
     //This is the index of the event/directory being edited
     private int editingIndex;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+    public TeamOwnerGUI(){
         //Use a border pane as the root for the scene
         borderPane = new BorderPane();
         //borderPane.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -111,10 +111,9 @@ public class TeamOwnerGUI extends Application{
 
         //Create and show scene
         Scene scene = new Scene(borderPane);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Team Owner Interface");
-        primaryStage.setMaximized(true);
-        primaryStage.show();
+        setScene(scene);
+        setTitle("Team Owner Interface");
+        setMaximized(true);
     }
 
     /**
@@ -453,7 +452,8 @@ public class TeamOwnerGUI extends Application{
                     dirAddressField.getText(),
                     dirPhoneNumField.getText()
             );
-            dirMgmt.addMember(newMember);
+            directory.add(newMember);
+            dirMgmt.updateDirectory(directory);
 
             borderPane.setCenter(directoryPane());
             borderPane.setBottom(directoryButtonPanel());
@@ -795,6 +795,7 @@ public class TeamOwnerGUI extends Application{
                         eventDay = newValue.intValue() + 1;
                     }
                 });
+
                 HBox hBox = new HBox();
                 hBox.setSpacing(20);
                 hBox.getChildren().addAll(monthBox, dayBox);
@@ -913,7 +914,8 @@ public class TeamOwnerGUI extends Application{
             newEvent.setTime(eventHour, eventMinute, eventAMPM);
             newEvent.setDetails(eventDetailsField.getText());
 
-            eventMgmt.addEvent(newEvent);
+            eventList.add(newEvent);
+            eventMgmt.updateEventList(eventList);
 
             borderPane.setCenter(eventSchedulePane());
             borderPane.setBottom(eventScheduleButtonPanel());
@@ -1460,7 +1462,8 @@ public class TeamOwnerGUI extends Application{
         gridPane.setVgap(60);
         gridPane.setPadding(CENTER_INSETS);
 
-        Label remainingFunds = new Label("Available Funds:  $6,000");
+        String remFunds = NumberFormat.getInstance().format(totalFunds);
+        Label remainingFunds = new Label("Available Funds: $" + remFunds);
         remainingFunds.setFont(LABEL_FONT);
 
         //Array of transactions as Texts
