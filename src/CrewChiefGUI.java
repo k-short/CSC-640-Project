@@ -20,6 +20,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -38,30 +39,11 @@ public class CrewChiefGUI extends Stage {
     private ArrayList<TimeRecord> timeRecords;
     private ArrayList<TeamEvent> eventList;
     private int selectedEvent;
-    private int selectedTime;
     private int currentLap = 1;
 
     private ArrayList<IssueRecord> issueRecords;
-    private int selectedIssue;
 
     private ArrayList<ExpenseRequest> expenseRequests;
-
-
-    String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
-    String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
-
-    String dummyIssue1 = "Issue:\t\t\ttire inventory low\nSolution:\t\t\torder more tires\n" +
-            "Actions Taken:\t\ttire expense submitted\nTimeline:\t\t\tImmediate\nPriority:\t\t\tNormal\n" +
-            "Status:\t\t\tUnresolved\n";
-    String dummyIssue2 = "Issue:\t\t\tfront suspension sounds worn\nSolution:\t\t\tInspect\n" +
-            "Actions Taken:\t\tinspected suspension, springs need replacement\nTimeline:\t\t\tImmediate\n" +
-            "Priority:\t\t\tHigh\nStatus:\t\t\tResolved\nResolver:\t\t\tRicky\n";
-    String dummyIssue3 = "Issue:\t\t\tfront springs need replacement\nSolution:\t\t\torder and replace front springs\n" +
-            "Actions Taken:\t\tfront spring expense submitted\nTimeline:\t\t\t1 Week\nPriority:\t\t\tHigh\n" +
-            "Status:\t\t\tUnresolved\n";
-
-    String dummyTimeTemp = "Event:\t\t2016081\nLap:\t\t\t";
-
 
     public CrewChiefGUI() {
 
@@ -84,7 +66,6 @@ public class CrewChiefGUI extends Stage {
         setTitle("Crew Chief Interface");
         setMaximized(true);
         //show();
-
 
     }
 
@@ -445,13 +426,6 @@ public class CrewChiefGUI extends Stage {
 
     private GridPane createExpenseRequestFormGridPaneEdit(ExpenseRequest record) {
 
-
-        String description;
-        Double cost;
-        String timeline;
-        String priority;
-
-
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
@@ -499,7 +473,6 @@ public class CrewChiefGUI extends Stage {
         return gridPane;
 
     }
-
 
 
     private ScrollPane createPrioritizeIssuesScrollPane() {
@@ -776,6 +749,21 @@ public class CrewChiefGUI extends Stage {
             gridPane.add(timeTxt, 0, gridRow, 2, 1);
             gridPane.add(txt3, 2, gridRow++, 1, 1);
 
+            Button editButton = new Button("Edit");
+            editButton.setOnAction((ActionEvent e) -> {
+                borderPane.setCenter(createTimeRecordFormGridPaneEdit(tr));
+            });
+
+            Button delButton = new Button("Delete");
+            delButton.setOnAction((ActionEvent e) -> {
+                timeRecords.remove(tr);
+                TimeAccess.saveTimeRecords(timeRecords);
+                borderPane.setCenter(createViewTimesScrollPane());
+            });
+
+            gridPane.add(editButton, 0, gridRow, 1, 1);
+            gridPane.add(delButton, 2, gridRow++, 1, 1);
+
             Separator separator = new Separator();
             gridPane.setValignment(separator, VPos.BOTTOM);
             gridPane.add(separator, 0, gridRow++, 3, 1);
@@ -786,4 +774,54 @@ public class CrewChiefGUI extends Stage {
 
         return scrollPane;
     }
+
+    private GridPane createTimeRecordFormGridPaneEdit(TimeRecord record) {
+
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        int gridRow = 0;
+
+        Label nameLabel = new Label("Event Name: ");
+        Label dateLabel = new Label("Event Date: ");
+        Label numLabel = new Label("Lap Number: ");
+        Label timeLabel = new Label("Lap Time: ");
+
+        TextField nameField = new TextField(record.getEventName());
+        TextField dateField = new TextField(String.valueOf(record.getEventDate()));
+        TextField numField = new TextField(String.valueOf(record.getLapNum()));
+        TextField timeField = new TextField(String.valueOf(record.getLapTime()));
+
+        gridPane.add(nameLabel, 0, gridRow, 1, 1);
+        gridPane.add(nameField, 1, gridRow++, 1, 1);
+
+        gridPane.add(dateLabel, 0, gridRow, 1, 1);
+        gridPane.add(dateField, 1, gridRow++, 1, 1);
+
+        gridPane.add(numLabel, 0, gridRow, 1, 1);
+        gridPane.add(numField, 1, gridRow++, 1, 1);
+
+        gridPane.add(timeLabel, 0, gridRow, 1, 1);
+        gridPane.add(timeField, 1, gridRow++, 1, 1);
+
+        Button saveButton = new Button("Save Changes");
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            timeRecords.remove(record);
+            TimeRecord tr = new TimeRecord(nameField.getText(),
+                    dateField.getText(),
+                    Integer.parseInt(numField.getText()),
+                    Double.parseDouble(timeField.getText()));
+            timeRecords.add(tr);
+            TimeAccess.saveTimeRecords(timeRecords);
+
+            borderPane.setCenter(createViewTimesScrollPane());
+        });
+
+        gridPane.add(saveButton, 1, ++gridRow, 1, 1);
+
+        return gridPane;
+    }
 }
+
