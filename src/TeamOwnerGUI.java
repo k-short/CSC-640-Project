@@ -240,6 +240,7 @@ public class TeamOwnerGUI extends Stage{
                 dirButtons[i] = new Button(directory.get(i).getName());
                 dirButtons[i].setId("" + i);
                 dirButtons[i].setPadding(new Insets(0, 0, 0, 0));
+                dirButtons[i].setTextFill(Color.BLACK);
             }
 
             //Apply settings to each button: font, action event, background
@@ -370,15 +371,15 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Name:"),
-                new Label("Job Title:"),
-                new Label("Home Address:"),
-                new Label("Phone Number:")
+        Text[] labels = new Text[]{
+                new Text("Name:"),
+                new Text("Job Title:"),
+                new Text("Home Address:"),
+                new Text("Phone Number:")
         };
 
         //Set font to each label
-        for(Label l : labels){
+        for(Text l : labels){
             l.setFont(TEXT_FONT);
         }
 
@@ -465,11 +466,11 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Name:"),
-                new Label("Job Title:"),
-                new Label("Home Address:"),
-                new Label("Phone Number:")
+        Text[] labels = new Text[]{
+                new Text("Name:"),
+                new Text("Job Title:"),
+                new Text("Home Address:"),
+                new Text("Phone Number:")
         };
 
         dirNameField = new TextField(member.getName());
@@ -576,6 +577,7 @@ public class TeamOwnerGUI extends Stage{
                 eventButtons[i] = new Button(eventList.get(i).getTitle());
                 eventButtons[i].setId("" + i);
                 eventButtons[i].setPadding(new Insets(0, 0, 0, 0));
+                eventButtons[i].setTextFill(Color.BLACK);
             }
 
             //Apply settings to each button: font, action event, background
@@ -719,14 +721,14 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Event Name:"),
-                new Label("Speedway:"),
-                new Label("Location:")
+        Text[] labels = new Text[]{
+                new Text("Event Name:"),
+                new Text("Speedway:"),
+                new Text("Location:")
         };
 
         //Set font to each label
-        for(Label l : labels){
+        for(Text l : labels){
             l.setFont(TEXT_FONT);
         }
 
@@ -835,7 +837,7 @@ public class TeamOwnerGUI extends Stage{
         //Set font to each Text
         for(int i = 0; i <= 5; i++){
             if(i == 3){//row for date choicebox
-                Label dateLabel = new Label("Date:");
+                Text dateLabel = new Text("Date:");
                 dateLabel.setFont(TEXT_FONT);
                 gridPane.add(dateLabel, 0, i);
                 HBox hBox = new HBox();
@@ -843,16 +845,16 @@ public class TeamOwnerGUI extends Stage{
                 hBox.getChildren().addAll(monthBox, dayBox);
                 gridPane.add(hBox, 1, i);
             }else if(i == 4){
-                Label timeLabel = new Label("Time:");
+                Text timeLabel = new Text("Time:");
                 timeLabel.setFont(TEXT_FONT);
                 gridPane.add(timeLabel, 0, i);
                 HBox hBox = new HBox();
                 hBox.setSpacing(10);
-                Label colon = new Label(":");
+                Text colon = new Text(":");
                 hBox.getChildren().addAll(hourBox, colon, minuteBox, AMPMBox);
                 gridPane.add(hBox, 1, i);
             }else if(i == 5){
-                Label details = new Label("Details:");
+                Text details = new Text("Details:");
                 details.setFont(TEXT_FONT);
                 gridPane.add(details, 0, i);
                 gridPane.add(eventDetailsField, 1, i);
@@ -927,14 +929,14 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setPadding(CENTER_INSETS);
 
         //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Event Name:"),
-                new Label("Speedway:"),
-                new Label("Location:")
+        Text[] labels = new Text[]{
+                new Text("Event Name:"),
+                new Text("Speedway:"),
+                new Text("Location:")
         };
 
         //Set font to each label
-        for(Label l : labels){
+        for(Text l : labels){
             l.setFont(TEXT_FONT);
         }
 
@@ -1044,7 +1046,7 @@ public class TeamOwnerGUI extends Stage{
         //Set font to each Text
         for(int i = 0; i <= 5; i++){
             if(i == 3){//row for date choicebox
-                Label dateLabel = new Label("Date:");
+                Text dateLabel = new Text("Date:");
                 dateLabel.setFont(TEXT_FONT);
                 gridPane.add(dateLabel, 0, i);
                 HBox hBox = new HBox();
@@ -1052,16 +1054,16 @@ public class TeamOwnerGUI extends Stage{
                 hBox.getChildren().addAll(monthBox, dayBox);
                 gridPane.add(hBox, 1, i);
             }else if(i == 4){
-                Label timeLabel = new Label("Time:");
+                Text timeLabel = new Text("Time:");
                 timeLabel.setFont(TEXT_FONT);
                 gridPane.add(timeLabel, 0, i);
                 HBox hBox = new HBox();
                 hBox.setSpacing(10);
-                Label colon = new Label(":");
+                Text colon = new Text(":");
                 hBox.getChildren().addAll(hourBox, colon, minuteBox, AMPMBox);
                 gridPane.add(hBox, 1, i);
             }else if(i == 5){
-                Label details = new Label("Details:");
+                Text details = new Text("Details:");
                 details.setFont(TEXT_FONT);
                 gridPane.add(details, 0, i);
                 gridPane.add(eventDetailsField, 1, i);
@@ -1143,7 +1145,7 @@ public class TeamOwnerGUI extends Stage{
 
         //Create funds label
         String remFunds = NumberFormat.getInstance().format(totalFunds);
-        Label fundsLabel = new Label("Available Funds: $" + remFunds);
+        Text fundsLabel = new Text("Available Funds: $" + remFunds);
         fundsLabel.setFont(LABEL_FONT);
 
         //Create funds log (scrollable pane)
@@ -1173,19 +1175,19 @@ public class TeamOwnerGUI extends Stage{
 
         if(transactions.size() > 0) {
             //Create funds log label
-            Label fundsLogLabel = new Label("Previous Transactions");
+            Text fundsLogLabel = new Text("Previous Transactions");
             fundsLogLabel.setFont(LABEL_FONT);
 
             //Labels for grid pane
-            Label dateLabel = new Label("Date and Time");
+            Text dateLabel = new Text("Date and Time");
             dateLabel.setFont(TEXT_FONT);
             dateLabel.setUnderline(true);
 
-            Label transactionLabel = new Label("Transaction");
+            Text transactionLabel = new Text("Transaction");
             transactionLabel.setFont(TEXT_FONT);
             transactionLabel.setUnderline(true);
 
-            Label remainingLabel = new Label("Funds Remaining");
+            Text remainingLabel = new Text("Funds Remaining");
             remainingLabel.setFont(TEXT_FONT);
             remainingLabel.setUnderline(true);
 
@@ -1289,10 +1291,10 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setVgap(FORM_VGAP);
 
         String remFunds = NumberFormat.getInstance().format(totalFunds);
-        Label remainingFunds = new Label("Available Funds: $"+ remFunds );
+        Text remainingFunds = new Text("Available Funds: $"+ remFunds );
         remainingFunds.setFont(LABEL_FONT);
 
-        Label addLabel = new Label("Add amount:");
+        Text addLabel = new Text("Add amount:");
         addLabel.setFont(TEXT_FONT);
 
         addFundsTextField = new TextField();
@@ -1319,10 +1321,10 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setVgap(FORM_VGAP);
 
         String remFunds = NumberFormat.getInstance().format(totalFunds);
-        Label remainingFunds = new Label("Available Funds: $" + remFunds);
+        Text remainingFunds = new Text("Available Funds: $" + remFunds);
         remainingFunds.setFont(LABEL_FONT);
 
-        Label addLabel = new Label("Remove amount:");
+        Text addLabel = new Text("Remove amount:");
         addLabel.setFont(TEXT_FONT);
 
         removeFundsTextField = new TextField();
@@ -1454,8 +1456,10 @@ public class TeamOwnerGUI extends Stage{
         //Do this for expense requests
         expenseRequests = expenseAccess.getExpenseRequests();
 
+        //Get total funds
+        totalFunds = fundsMgmt.getFunds();
         String remFunds = NumberFormat.getInstance().format(totalFunds);
-        Label remainingFunds = new Label("Available Funds: $" + remFunds);
+        Text remainingFunds = new Text("Available Funds: $" + remFunds);
         remainingFunds.setFont(LABEL_FONT);
 
         if(expenseRequests != null) {
@@ -1563,6 +1567,9 @@ public class TeamOwnerGUI extends Stage{
         }
 
         gridPane.add(remainingFunds, 0, 0);
+        Text noDir = new Text("There are no expense requests.");
+        noDir.setFont(LABEL_FONT);
+        gridPane.add(noDir, 0 ,1);
 
         //Scroll pane to hold grid pane of transactions
         ScrollPane scrollPane = new ScrollPane(gridPane);
@@ -1579,7 +1586,7 @@ public class TeamOwnerGUI extends Stage{
         HBox hBox = new HBox();
         hBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        Label label = new Label("Team Owner");
+        Text label = new Text("Team Owner");
         label.setFont(MENU_TITLE_FONT);
         hBox.getChildren().add(label);
         hBox.setPadding(new Insets(20, 20, 20 ,20));
