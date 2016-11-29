@@ -41,7 +41,13 @@ public class ExpenseAccess {
             c.printStackTrace();
         }
 
-        return sort(expenseRequests);
+        try{
+            expenseRequests = sort(expenseRequests);
+        } catch (Exception e){
+
+        }
+
+        return expenseRequests;
     }
 
     private static ArrayList<ExpenseRequest> sort(ArrayList<ExpenseRequest> list){

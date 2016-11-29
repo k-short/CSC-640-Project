@@ -512,12 +512,13 @@ public class CrewChiefGUI extends Stage {
         gridPane.add(addButton, 0, gridRow++, 3, 1);
 
         issueRecords = IssueAccess.getIssueRecords();
-        sortIssues();
 
         if (issueRecords == null) {
-            gridPane.getChildren().add(new Text("No Issue Records"));
+            gridPane.add(new Text("No Issue Records"), 0, gridRow++, 1, 1);
             ScrollPane scrollPane = new ScrollPane(gridPane);
             return scrollPane;
+        } else {
+            sortIssues();
         }
 
         for (IssueRecord ir : issueRecords) {
