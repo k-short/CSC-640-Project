@@ -1,4 +1,7 @@
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,12 +20,13 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
  * Created by Jonathon Tovey on 10/21/2016 based on Ken Short's example.
  */
-public class CrewChiefGUI extends Application{
+public class CrewChiefGUI extends Stage {
     private final Font MENU_TITLE_FONT = Font.font("Arial", FontWeight.BOLD, 20);
     private final Font HEADER_TITLE_FONT = Font.font("Arial", FontWeight.BOLD, 40);
     private final Font MENU_OPTION_FONT = Font.font("Arial", FontWeight.NORMAL, 18);
@@ -30,6 +34,15 @@ public class CrewChiefGUI extends Application{
     private final Font TEXT_FONT = Font.font("Arial", FontWeight.NORMAL, 14);
     private final int DIR_FONT_SIZE = 14;
     private BorderPane borderPane;
+
+    private ArrayList<TimeRecord> timeRecords;
+    private ArrayList<TeamEvent> eventList;
+    private int selectedEvent;
+    private int selectedTime;
+    private int currentLap = 1;
+
+    private ArrayList<IssueRecord> issueRecords;
+    private int selectedIssue;
 
     String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
     String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
@@ -46,8 +59,8 @@ public class CrewChiefGUI extends Application{
 
     String dummyTimeTemp = "Event:\t\t2016081\nLap:\t\t\t";
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+
+    public CrewChiefGUI() {
 
         //Use a border pane as the root for the scene
         borderPane = new BorderPane();
@@ -64,13 +77,15 @@ public class CrewChiefGUI extends Application{
 
         //Create and show scene
         Scene scene = new Scene(borderPane);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Crew Chief Interface");
-        primaryStage.setMaximized(true);
-        primaryStage.show();
+        setScene(scene);
+        setTitle("Crew Chief Interface");
+        setMaximized(true);
+        //show();
+
+
     }
 
-    private HBox createTeamBranding(){
+    private HBox createTeamBranding() {
 
         HBox header = new HBox();
 
@@ -103,10 +118,34 @@ public class CrewChiefGUI extends Application{
         return header;
     }
 
+    private VBox createStupidIntro() {
+
+        VBox intro = new VBox();
+
+        intro.setPadding(new Insets(10));
+        intro.setSpacing(30);
+
+        Text quote = new Text("\"If you ain't first, you're last.™\" - Ricky Bobby");
+        quote.setFont(MENU_TITLE_FONT);
+        quote.setFill(Paint.valueOf("#CC0000"));
+        quote.setTextAlignment(TextAlignment.CENTER);
+        intro.getChildren().add(quote);
+
+        // ricky bobby image
+        File rbFile = new File("img/ricky-bobby-750h.png");
+        Image rbImage = new Image(rbFile.toURI().toString());
+        ImageView rbView = new ImageView(rbImage);
+        intro.getChildren().add(rbView);
+
+        intro.setAlignment(Pos.CENTER);
+
+        return intro;
+    }
+
     /**
      * Create a VBox to hold the menu on left side of border pane
      */
-    private VBox createSideMenuVBox(){
+    private VBox createSideMenuVBox() {
         VBox menu = new VBox();
 
         //Set the padding around the vbox
@@ -167,7 +206,7 @@ public class CrewChiefGUI extends Application{
         ToggleButton[] menuOptions = new ToggleButton[]{intro, requestExpenses, prioritizeIssues, viewTimes};
 
         //Add each of the menu options to the vbox
-        for (int i=0; i<menuOptions.length; i++) {
+        for (int i = 0; i < menuOptions.length; i++) {
             // Add offset to left side to indent from title
             VBox.setMargin(menuOptions[i], new Insets(0, 0, 0, 40));
             menu.getChildren().add(menuOptions[i]);
@@ -180,31 +219,32 @@ public class CrewChiefGUI extends Application{
         return menu;
     }
 
-    private VBox createStupidIntro(){
 
-        VBox intro = new VBox();
+    // get array of events for createTimeLogger
+    private String[] getEventsArray() {
+        EventAccess ea = new EventAccess();
+        eventList = ea.getEvents();
 
-        intro.setPadding(new Insets(10));
-        intro.setSpacing(30);
+        //ArrayList<String> events = new ArrayList<>();
+        String[] eventStrs = new String[eventList.size()];
+        int eventItr = 0;
 
-        Text quote = new Text("\"If you ain't first, you're last.™\" - Ricky Bobby");
-        quote.setFont(MENU_TITLE_FONT);
-        quote.setFill(Paint.valueOf("#CC0000"));
-        quote.setTextAlignment(TextAlignment.CENTER);
-        intro.getChildren().add(quote);
+        if (eventList == null) {
+            return null;
+        }
 
-        // ricky bobby image
-        File rbFile = new File("img/ricky-bobby-750h.png");
-        Image rbImage = new Image(rbFile.toURI().toString());
-        ImageView rbView = new ImageView(rbImage);
-        intro.getChildren().add(rbView);
+        for (TeamEvent te : eventList) {
+            String str = te.getTitle();
+            str += " (" + te.getDate() + ")";
+            //events.add(te.getTitle());
+            eventStrs[eventItr++] = str;
+        }
 
-        intro.setAlignment(Pos.CENTER);
-
-        return intro;
+        return eventStrs;
+        //return (String[]) events.toArray();
     }
 
-    private VBox createTimeLogger(){
+    private VBox createTimeLogger() {
 
         VBox timeLogger = new VBox();
 
@@ -217,29 +257,56 @@ public class CrewChiefGUI extends Application{
         title.setTextAlignment(TextAlignment.CENTER);
         timeLogger.getChildren().add(title);
 
-        //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Event:"),
-                new Label("Lap:"),
-                new Label("Time:")
-        };
+        Label eventLabel = new Label("Event:");
+        eventLabel.setFont(TEXT_FONT);
+        timeLogger.getChildren().add(eventLabel);
 
-        //Each field with default text already in directory (dummy text for now)
-        TextField[] defaultFields = new TextField[]{
-                new TextField("2016081"),
-                new TextField("73"),
-                new TextField("61.149")
-        };
+        String[] events = getEventsArray();
+        ChoiceBox choiceBox = new ChoiceBox(FXCollections.observableArrayList(events));
+        choiceBox.setTooltip(new Tooltip("Select Event"));
+        choiceBox.getSelectionModel().selectFirst();
 
-        //Add each label to grid pane
-        //Set normal text font to each
-        for(int i = 0; i < labels.length; i++){
-            labels[i].setFont(TEXT_FONT);
-            timeLogger.getChildren().add(labels[i]);
-            timeLogger.getChildren().add(defaultFields[i]);
-        }
+        //Create choice box to allow user to select interface (team owner/crew chief)
+        choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                selectedEvent = newValue.intValue();
+            }
+        });
+
+        timeLogger.getChildren().add(choiceBox);
+
+        Label lapLabel = new Label("Lap");
+        lapLabel.setFont(TEXT_FONT);
+        TextField lapField = new TextField(String.valueOf(currentLap));
+        timeLogger.getChildren().addAll(lapLabel, lapField);
+
+        Label timeLabel = new Label("Time");
+        timeLabel.setFont(TEXT_FONT);
+        TextField timeField = new TextField("");
+        timeLogger.getChildren().addAll(timeLabel, timeField);
 
         ToggleButton logTime = new ToggleButton("Log Time");
+        logTime.setOnAction((ActionEvent e) -> {
+
+            int lap = Integer.parseInt(lapField.getText());
+            Double time = Double.parseDouble(timeField.getText());
+            TimeRecord tr = new TimeRecord(eventList.get(selectedEvent).getTitle(), eventList.get(selectedEvent).getDate(), lap, time);
+
+            timeRecords = TimeAccess.getTimeRecords();
+            if (timeRecords == null) {
+                timeRecords = new ArrayList<TimeRecord>();
+            }
+            timeRecords.add(tr);
+
+            TimeAccess.saveTimeRecords(timeRecords);
+
+            currentLap = lap;
+            lapField.setText(String.valueOf(++currentLap));
+            timeField.setText("");
+            logTime.setSelected(false);
+
+        });
 
         timeLogger.getChildren().add(logTime);
 
@@ -250,7 +317,7 @@ public class CrewChiefGUI extends Application{
     /**
      * Create a grid pane to show information based on menu option currently selected.
      */
-    private ScrollPane createRequestExpenseScrollPane(){
+    private ScrollPane createRequestExpenseScrollPane() {
 
         GridPane gridPane = new GridPane();
         ToggleGroup toggleGroup = new ToggleGroup();
@@ -290,7 +357,7 @@ public class CrewChiefGUI extends Application{
 
         //Add each directory string to the grid pane
         //Set font for each
-        for(int i = 0; i < expenseList.length; i++){
+        for (int i = 0; i < expenseList.length; i++) {
             gridPane.add(expenseList[i], 1, i);
             expenseList[i].setFont(TEXT_FONT);
 
@@ -313,7 +380,7 @@ public class CrewChiefGUI extends Application{
         return scrollPane;
     }
 
-    private HBox createRequestExpenseButtonsHBox(){
+    private HBox createRequestExpenseButtonsHBox() {
         HBox buttonPanel = new HBox();
         buttonPanel.setAlignment(Pos.CENTER);
 
@@ -350,7 +417,7 @@ public class CrewChiefGUI extends Application{
         return buttonPanel;
     }
 
-    private GridPane createRequestExpenseFormGridPane(){
+    private GridPane createRequestExpenseFormGridPane() {
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
@@ -374,7 +441,7 @@ public class CrewChiefGUI extends Application{
 
         //Add each label to grid pane
         //Set normal text font to each
-        for(int i = 0; i < labels.length; i++){
+        for (int i = 0; i < labels.length; i++) {
             labels[i].setFont(TEXT_FONT);
 
             gridPane.add(labels[i], 0, i);
@@ -388,64 +455,90 @@ public class CrewChiefGUI extends Application{
     /**
      * Create a grid pane to show information based on menu option currently selected.
      */
-    private ScrollPane createPrioritizeIssuesScrollPane(){
-        GridPane gridPane = new GridPane();
-        ToggleGroup toggleGroup = new ToggleGroup();
+    private ScrollPane createPrioritizeIssuesScrollPane() {
 
-        //Set padding and gaps
+        GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 20, 20, 20));
+        int gridRow = 0;
 
-        int order = 1;
+        issueRecords = IssueAccess.getIssueRecords();
 
-        //Dummy info to be added for now
-        Text[] expenseList = new Text[]{
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue1),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue2),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue3),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue1),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue2),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue3),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue1),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue2),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue3),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue1),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue2),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue3),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue1),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue2),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue3),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue1),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue2),
-                new Text("Order:\t\t\t" + order++ + "\n" + dummyIssue3),
-        };
-
-        //Add each directory string to the grid pane
-        //Set font for each
-        for(int i = 0; i < expenseList.length; i++){
-            gridPane.add(expenseList[i], 1, i);
-            expenseList[i].setFont(TEXT_FONT);
-
-            //Add a seperator between directory members
-            Separator separator = new Separator();
-            gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, i, 2, 1);
-
-            //Create a radio button to be added next to each directory member
-            RadioButton radioButton = new RadioButton("");
-            radioButton.setToggleGroup(toggleGroup);
-            gridPane.setValignment(radioButton, VPos.TOP); //Put button at top of cell
-            gridPane.add(radioButton, 0, i);
+        if (issueRecords == null) {
+            gridPane.getChildren().add(new Text("No Issue Records"));
+            ScrollPane scrollPane = new ScrollPane(gridPane);
+            return scrollPane;
         }
 
-        //Add the grid pane to a scroll pane
+        for (IssueRecord ir : issueRecords) {
+
+            Text txtOrder = new Text(String.valueOf(ir.getOrder()));
+            txtOrder.setFont(LABEL_FONT);
+            Text txtDescription = new Text(ir.description);
+            txtDescription.setFont(TEXT_FONT);
+            Text txtSolution = new Text(ir.solution);
+            txtSolution.setFont(TEXT_FONT);
+            Text txtActionsTaken = new Text(ir.actionsTaken);
+            txtActionsTaken.setFont(TEXT_FONT);
+            Text txtTimeline = new Text(ir.timeline);
+            txtTimeline.setFont(TEXT_FONT);
+            Text txtPriority = new Text(ir.priority);
+            txtPriority.setFont(TEXT_FONT);
+            Text txtStatus = new Text(ir.status);
+            txtStatus.setFont(TEXT_FONT);
+
+
+            Text orderTxt = new Text("Order: ");
+            Text descriptionTxt = new Text("Description: ");
+            Text solutionTxt = new Text("Solution: ");
+            Text actionsTakenTxt = new Text("Actions Taken: ");
+            Text timelineTxt = new Text("Timeline: ");
+            Text priorityTxt = new Text("Priority: ");
+            Text statusTxt = new Text("Status: ");
+
+
+            gridPane.add(orderTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtOrder, 1, gridRow++, 1, 1);
+
+            gridPane.add(descriptionTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtDescription, 1, gridRow++, 1, 1);
+
+            gridPane.add(solutionTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtSolution, 1, gridRow++, 1, 1);
+
+            gridPane.add(actionsTakenTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtActionsTaken, 1, gridRow++, 1, 1);
+
+            gridPane.add(timelineTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtTimeline, 1, gridRow++, 1, 1);
+
+            gridPane.add(priorityTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtPriority, 1, gridRow++, 1, 1);
+
+            gridPane.add(statusTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtStatus, 1, gridRow++, 1, 1);
+
+            Separator separator = new Separator();
+            gridPane.setValignment(separator, VPos.BOTTOM);
+            gridPane.add(separator, 0, gridRow++, 3, 1);
+
+            Button editButton = new Button("Add New Issue");
+
+            //If edit button is selected, switch to show dir change form and buttons
+            editButton.setOnAction((ActionEvent e) -> {
+                borderPane.setCenter(createPrioritizeIssuesFormGridPaneEdit(ir));
+            });
+        }
+
+
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
         return scrollPane;
+
     }
 
-    private HBox createPrioritizeIssuesButtonsHBox(){
+    private HBox createPrioritizeIssuesButtonsHBox() {
         HBox buttonPanel = new HBox();
         buttonPanel.setAlignment(Pos.CENTER);
 
@@ -462,12 +555,12 @@ public class CrewChiefGUI extends Application{
 
         //If edit button is selected, switch to show dir change form and buttons
         editButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createPrioritizeIssuesFormGridPane());
+            //borderPane.setCenter(createPrioritizeIssuesFormGridPaneEdit());
             borderPane.setBottom(createGenericCancelSave());
         });
 
         newButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createPrioritizeIssuesFormGridPane());
+            borderPane.setCenter(createPrioritizeIssuesFormGridPaneAdd());
             borderPane.setBottom(createGenericCancelSave());
         });
 
@@ -482,112 +575,199 @@ public class CrewChiefGUI extends Application{
         return buttonPanel;
     }
 
-    private GridPane createPrioritizeIssuesFormGridPane(){
+    private GridPane createPrioritizeIssuesFormGridPaneAdd() {
+
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(25, 25, 25, 25));
+        int gridRow = 0;
 
-        //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Order:"),
-                new Label("Issue:"),
-                new Label("Solution:"),
-                new Label("Actions Taken:"),
-                new Label("Timeline:"),
-                new Label("Priority:"),
-                new Label("Status"),
+        Label orderLabel = new Label("Order: ");
+        Label descriptionLabel = new Label("Description: ");
+        Label solutionLabel = new Label("Solution: ");
+        Label actionsTakenLabel = new Label("Actions Taken: ");
+        Label timelineLabel = new Label("Timeline: ");
+        Label priorityLabel = new Label("Priority: ");
+        Label statusLabel = new Label("Status: ");
 
-        };
+        TextField orderField = new TextField("");
+        TextField descriptionField = new TextField("");
+        TextField solutionField = new TextField("");
+        TextField actionsTakenField = new TextField("");
+        TextField timelineField = new TextField("");
+        TextField priorityField = new TextField("");
+        TextField statusField = new TextField("");
 
-        //Each field with default text already in directory (dummy text for now)
-        TextField[] defaultFields = new TextField[]{
-                new TextField("3"),
-                new TextField("front springs need replacement"),
-                new TextField("order and replace front springs"),
-                new TextField("front spring expense submitted"),
-                new TextField("1 Week"),
-                new TextField("High"),
-                new TextField("Unresolved"),
-        };
+        gridPane.add(orderLabel, 0, gridRow, 1, 1);
+        gridPane.add(orderField, 1, gridRow++, 1, 1);
 
-        //Add each label to grid pane
-        //Set normal text font to each
-        for(int i = 0; i < labels.length; i++){
-            labels[i].setFont(TEXT_FONT);
+        gridPane.add(descriptionLabel, 0, gridRow, 1, 1);
+        gridPane.add(descriptionField, 1, gridRow++, 1, 1);
 
-            gridPane.add(labels[i], 0, i);
-            gridPane.add(defaultFields[i], 1, i);
-        }
+        gridPane.add(solutionLabel, 0, gridRow, 1, 1);
+        gridPane.add(solutionField, 1, gridRow++, 1, 1);
+
+        gridPane.add(actionsTakenLabel, 0, gridRow, 1, 1);
+        gridPane.add(actionsTakenField, 1, gridRow++, 1, 1);
+
+        gridPane.add(timelineLabel, 0, gridRow, 1, 1);
+        gridPane.add(timelineField, 1, gridRow++, 1, 1);
+
+        gridPane.add(priorityLabel, 0, gridRow, 1, 1);
+        gridPane.add(priorityField, 1, gridRow++, 1, 1);
+
+        gridPane.add(statusLabel, 0, gridRow, 1, 1);
+        gridPane.add(statusField, 1, gridRow++, 1, 1);
+
+        Button saveButton = new Button("Add New Issue");
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            issueRecords = IssueAccess.getIssueRecords();
+            if (issueRecords == null) {
+                issueRecords = new ArrayList<IssueRecord>();
+            }
+            IssueRecord ir = new IssueRecord(Integer.parseInt(orderField.getText()),
+                    descriptionField.getText(),
+                    solutionField.getText(),
+                    actionsTakenField.getText(),
+                    timelineField.getText(),
+                    priorityField.getText(),
+                    statusField.getText());
+            issueRecords.add(ir);
+            IssueAccess.saveIssueRecords(issueRecords);
+
+        });
+
+        gridPane.add(saveButton, 1, ++gridRow, 1, 1);
 
         return gridPane;
     }
 
-    private ScrollPane createViewTimesScrollPane(){
+    private GridPane createPrioritizeIssuesFormGridPaneEdit(IssueRecord record) {
 
         GridPane gridPane = new GridPane();
-        ToggleGroup toggleGroup = new ToggleGroup();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        int gridRow = 0;
 
-        //Set padding and gaps
+        Label orderLabel = new Label("Order: ");
+        Label descriptionLabel = new Label("Description: ");
+        Label solutionLabel = new Label("Solution: ");
+        Label actionsTakenLabel = new Label("Actions Taken: ");
+        Label timelineLabel = new Label("Timeline: ");
+        Label priorityLabel = new Label("Priority: ");
+        Label statusLabel = new Label("Status: ");
+
+        TextField orderField = new TextField(Integer.toString(record.getOrder()));
+        TextField descriptionField = new TextField(record.getDescription());
+        TextField solutionField = new TextField(record.getSolution());
+        TextField actionsTakenField = new TextField(record.getActionsTaken());
+        TextField timelineField = new TextField(record.getTimeline());
+        TextField priorityField = new TextField(record.getPriority());
+        TextField statusField = new TextField(record.getStatus());
+
+        gridPane.add(orderLabel, 0, gridRow, 1, 1);
+        gridPane.add(orderField, 1, gridRow++, 1, 1);
+
+        gridPane.add(descriptionLabel, 0, gridRow, 1, 1);
+        gridPane.add(descriptionField, 1, gridRow++, 1, 1);
+
+        gridPane.add(solutionLabel, 0, gridRow, 1, 1);
+        gridPane.add(solutionField, 1, gridRow++, 1, 1);
+
+        gridPane.add(actionsTakenLabel, 0, gridRow, 1, 1);
+        gridPane.add(actionsTakenField, 1, gridRow++, 1, 1);
+
+        gridPane.add(timelineLabel, 0, gridRow, 1, 1);
+        gridPane.add(timelineField, 1, gridRow++, 1, 1);
+
+        gridPane.add(priorityLabel, 0, gridRow, 1, 1);
+        gridPane.add(priorityField, 1, gridRow++, 1, 1);
+
+        gridPane.add(statusLabel, 0, gridRow, 1, 1);
+        gridPane.add(statusField, 1, gridRow++, 1, 1);
+
+        Button saveButton = new Button("Save Changes");
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            issueRecords = IssueAccess.getIssueRecords();
+            issueRecords.remove(record);
+            if (issueRecords == null) {
+                issueRecords = new ArrayList<IssueRecord>();
+            }
+            IssueRecord ir = new IssueRecord(Integer.parseInt(orderField.getText()),
+                    descriptionField.getText(),
+                    solutionField.getText(),
+                    actionsTakenField.getText(),
+                    timelineField.getText(),
+                    priorityField.getText(),
+                    statusField.getText());
+            issueRecords.add(ir);
+            IssueAccess.saveIssueRecords(issueRecords);
+
+        });
+
+        gridPane.add(saveButton, 1, ++gridRow, 1, 1);
+
+        borderPane.setCenter(createPrioritizeIssuesScrollPane());
+
+        return gridPane;
+
+
+
+
+    }
+
+
+    private ScrollPane createViewTimesScrollPane() {
+
+        GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 20, 20, 20));
+        int gridRow = 0;
 
-        int lap = 1;
+        timeRecords = TimeAccess.getTimeRecords();
 
-        Random r = new Random();
+        if (timeRecords == null) {
+            gridPane.getChildren().add(new Text("No Lap Records"));
+            ScrollPane scrollPane = new ScrollPane(gridPane);
+            return scrollPane;
+        }
 
-        //Dummy info to be added for now
-        Text[] expenseList = new Text[]{
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
-                new Text(dummyTimeTemp + lap++ + "\nTime:\t\t" + (58 + r.nextInt(5)) + "." + r.nextInt(1000) + "\n"),
+        for (TimeRecord tr : timeRecords) {
+            Text txt1 = new Text(tr.eventName + " (" + tr.eventDate + ")");
+            txt1.setFont(LABEL_FONT);
+            Text txt2 = new Text(String.valueOf(tr.lapNum));
+            txt2.setFont(TEXT_FONT);
+            Text txt3 = new Text(String.valueOf(tr.lapTime));
+            txt3.setFont(TEXT_FONT);
 
-        };
+            Text lapTxt = new Text("Lap: ");
+            Text timeTxt = new Text("Time: ");
 
-        //Add each directory string to the grid pane
-        //Set font for each
-        for(int i = 0; i < expenseList.length; i++){
-            gridPane.add(expenseList[i], 1, i);
-            expenseList[i].setFont(TEXT_FONT);
+            gridPane.add(txt1, 0, gridRow++, 3, 1);
 
-            //Add a seperator between directory members
+            gridPane.add(lapTxt, 0, gridRow, 2, 1);
+            gridPane.add(txt2, 2, gridRow++, 1, 1);
+
+            gridPane.add(timeTxt, 0, gridRow, 2, 1);
+            gridPane.add(txt3, 2, gridRow++, 1, 1);
+
             Separator separator = new Separator();
             gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, i, 2, 1);
-
-            //Create a radio button to be added next to each directory member
-            RadioButton radioButton = new RadioButton("");
-            radioButton.setToggleGroup(toggleGroup);
-            gridPane.setValignment(radioButton, VPos.TOP); //Put button at top of cell
-            gridPane.add(radioButton, 0, i);
+            gridPane.add(separator, 0, gridRow++, 3, 1);
         }
 
 
-        //Add the grid pane to a scroll pane
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
         return scrollPane;
     }
 
-    private HBox createViewTimesButtonsHBox(){
+    private HBox createViewTimesButtonsHBox() {
         HBox buttonPanel = new HBox();
         buttonPanel.setAlignment(Pos.CENTER);
 
@@ -618,7 +798,7 @@ public class CrewChiefGUI extends Application{
         return buttonPanel;
     }
 
-    private GridPane createEditTimeFormGridPane(){
+    private GridPane createEditTimeFormGridPane() {
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
@@ -640,7 +820,7 @@ public class CrewChiefGUI extends Application{
 
         //Add each label to grid pane
         //Set normal text font to each
-        for(int i = 0; i < labels.length; i++){
+        for (int i = 0; i < labels.length; i++) {
             labels[i].setFont(TEXT_FONT);
 
             gridPane.add(labels[i], 0, i);
@@ -650,7 +830,7 @@ public class CrewChiefGUI extends Application{
         return gridPane;
     }
 
-    private HBox createGenericCancelSave(){
+    private HBox createGenericCancelSave() {
 
         HBox hbox = new HBox();
         hbox.setAlignment(Pos.CENTER);

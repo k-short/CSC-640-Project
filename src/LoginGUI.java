@@ -45,6 +45,9 @@ public class LoginGUI extends Application {
                 primaryStage.close();
             }else if(selectedUser == 1){
                 //go to crew chief interface
+                Stage curStage = new CrewChiefGUI();
+                curStage.show();
+                primaryStage.close();
             }
         });
 
