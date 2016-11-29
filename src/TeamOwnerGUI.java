@@ -61,6 +61,7 @@ public class TeamOwnerGUI extends Stage{
     private ArrayList<TeamEvent> eventList;
     private ArrayList<DirectoryMember> directory;
     private ArrayList<Transaction> transactions;
+    private ArrayList<ExpenseRequest> expenseRequests;
     private Double totalFunds;
 
     //Text fields to hold information to be added to serialized files
@@ -1462,65 +1463,79 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setVgap(60);
         gridPane.setPadding(CENTER_INSETS);
 
+        //Do this for expense requests
+        //eventList = eventMgmt.getEventList();
+
         String remFunds = NumberFormat.getInstance().format(totalFunds);
         Label remainingFunds = new Label("Available Funds: $" + remFunds);
         remainingFunds.setFont(LABEL_FONT);
 
-        //Array of transactions as Texts
-        Text[] requests = new Text[]{
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1)
-        };
+        if(expenseRequests.size() > 0) {
+            //Array of transactions as Texts
+            Text[] request = new Text[expenseRequests.size()];
+            for (int i = 0; i < request.length; i++) {
+                //Add request strings here
+                request[i].setFont(TEXT_FONT);
+            }
 
-        //Set font of requests
-        for(Text t : requests){
-            t.setFont(TEXT_FONT);
-        }
+            //Create action listeners for the buttons.
+            EventHandler<ActionEvent> acceptButtonPress = new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    Button btn = (Button) event.getSource();
+                    int id = Integer.parseInt(btn.getId());
+                    //subtract expense amount from remaining funds
+                    expenseRequests.remove(id);
+                    //updateRequests
+                }
+            };
 
-        String decline = "Decline";
-        String accept = "Accept";
+            EventHandler<ActionEvent> declineButtonPress = new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    Button btn = (Button) event.getSource();
+                    int id = Integer.parseInt(btn.getId());
+                    expenseRequests.remove(id);
+                    //updateRequests
+                }
+            };
 
-        //Array of remaining funds as Texts
-        Button[] declineButtons = new Button[]{
-                new Button(decline),
-                new Button(decline),
-                new Button(decline),
-                new Button(decline),
-                new Button(decline)
-        };
+            String decline = "Decline";
+            String accept = "Accept";
 
-        //Array of remaining funds as Texts
-        Button[] acceptButtons = new Button[]{
-                new Button(accept),
-                new Button(accept),
-                new Button(accept),
-                new Button(accept),
-                new Button(accept)
-        };
+            //Array of decline buttons
+            Button[] declineButton = new Button[expenseRequests.size()];
+            for (int i = 0; i < declineButton.length; i++) {
+                Button b = new Button(decline);
+                b.setId(i + "");
+                b.setPrefSize(100, 20);
+                b.setOnAction(declineButtonPress);
+                declineButton[i] = b;
+            }
 
-        for(Button b : declineButtons){
-            b.setPrefSize(100, 20);
-        }
+            //Array of accept buttons
+            Button[] acceptButton = new Button[expenseRequests.size()];
+            for (int i = 0; i < acceptButton.length; i++) {
+                Button b = new Button(accept);
+                b.setId(i + "");
+                b.setPrefSize(100, 20);
+                b.setOnAction(acceptButtonPress);
+                acceptButton[i] = b;
+            }
 
-        for(Button b : acceptButtons){
-            b.setPrefSize(100, 20);
+            //Add the requests followed by accept/decline buttons
+            for(int i = 0; i < request.length; i++){
+                gridPane.add(request[i], 0, i + 1);
+
+                gridPane.setValignment(declineButton[i], VPos.TOP);
+                gridPane.setValignment(acceptButton[i], VPos.CENTER);
+
+                gridPane.add(acceptButton[i], 1, i + 1);
+                gridPane.add(declineButton[i], 1, i + 1);
+            }
         }
 
         gridPane.add(remainingFunds, 0, 0);
-
-        //Add the requests followed by accept/decline buttons
-        for(int i = 0; i < requests.length; i++){
-            gridPane.add(requests[i], 0, i + 1);
-
-            gridPane.setValignment(declineButtons[i], VPos.TOP);
-            gridPane.setValignment(acceptButtons[i], VPos.CENTER);
-
-            gridPane.add(acceptButtons[i], 1, i + 1);
-            gridPane.add(declineButtons[i], 1, i + 1);
-        }
 
         //Scroll pane to hold grid pane of transactions
         ScrollPane scrollPane = new ScrollPane(gridPane);
