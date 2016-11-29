@@ -1,13 +1,10 @@
-import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.*;
-import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -16,22 +13,15 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import oracle.jrockit.jfr.StringConstantPool;
-
-import javax.swing.*;
-import java.awt.*;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -51,13 +41,11 @@ public class TeamOwnerGUI extends Stage{
     private final int TEXT_FIELD_WIDTH = 250;
     private BorderPane borderPane;
 
-    String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
-    String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
-
     //Management objects and associated lists
     private EventScheduleManagement eventMgmt = new EventScheduleManagement();
     private TeamDirectoryManagement dirMgmt = new TeamDirectoryManagement();
     private TeamFundsManagement fundsMgmt = new TeamFundsManagement();
+    private ExpenseAccess expenseAccess = new ExpenseAccess();
     private ArrayList<TeamEvent> eventList;
     private ArrayList<DirectoryMember> directory;
     private ArrayList<Transaction> transactions;
@@ -69,12 +57,10 @@ public class TeamOwnerGUI extends Stage{
     private TextField eventSpeedwayField;
     private TextField eventLocationField;
     private TextField eventDetailsField;
-
     private TextField dirNameField;
     private TextField dirJobTitleField;
     private TextField dirAddressField;
     private TextField dirPhoneNumField;
-
     private TextField addFundsTextField;
     private TextField removeFundsTextField;
 
@@ -1464,18 +1450,44 @@ public class TeamOwnerGUI extends Stage{
         gridPane.setPadding(CENTER_INSETS);
 
         //Do this for expense requests
-        //eventList = eventMgmt.getEventList();
+        expenseRequests = expenseAccess.getExpenseRequests();
 
         String remFunds = NumberFormat.getInstance().format(totalFunds);
         Label remainingFunds = new Label("Available Funds: $" + remFunds);
         remainingFunds.setFont(LABEL_FONT);
 
         if(expenseRequests.size() > 0) {
-            //Array of transactions as Texts
-            Text[] request = new Text[expenseRequests.size()];
-            for (int i = 0; i < request.length; i++) {
-                //Add request strings here
-                request[i].setFont(TEXT_FONT);
+            //Array of descriptions as Texts
+            Text[] description = new Text[expenseRequests.size()];
+            for (int i = 0; i < description.length; i++) {
+                Text t = new Text(expenseRequests.get(i).getDescription());
+                t.setFont(TEXT_FONT);
+                description[i] = t;
+            }
+
+            //Array of costs as Doubles
+            Text[] cost = new Text[expenseRequests.size()];
+            for (int i = 0; i < cost.length; i++) {
+                String costStr = NumberFormat.getInstance().format(expenseRequests.get(i).getCost());
+                Text t = new Text(costStr);
+                t.setFont(TEXT_FONT);
+                cost[i] = t;
+            }
+
+            //Array of timelines as Texts
+            Text[] timeline = new Text[expenseRequests.size()];
+            for (int i = 0; i < timeline.length; i++) {
+                Text t = new Text(expenseRequests.get(i).getTimeline());
+                t.setFont(TEXT_FONT);
+                timeline[i] = t;
+            }
+
+            //Array of priorities as Texts
+            Text[] priority = new Text[expenseRequests.size()];
+            for (int i = 0; i < priority.length; i++) {
+                Text t = new Text(expenseRequests.get(i).getPriority());
+                t.setFont(TEXT_FONT);
+                priority[i] = t;
             }
 
             //Create action listeners for the buttons.
@@ -1484,9 +1496,17 @@ public class TeamOwnerGUI extends Stage{
                 public void handle(ActionEvent event) {
                     Button btn = (Button) event.getSource();
                     int id = Integer.parseInt(btn.getId());
-                    //subtract expense amount from remaining funds
-                    expenseRequests.remove(id);
-                    //updateRequests
+
+                    //See if there are enough funds to accept the request
+                    if(expenseRequests.get(id).getCost() > remainingFunds){
+                        //display error dialog
+                        Stage errorStage = new ErrorDialog("Insufficient funds available.");
+                        errorStage.show();
+                    }else{
+                        expenseRequests.remove(id);
+                        expenseAccess.save(expenseRequests);
+                        borderPane.setCenter(expenseRequestPane());
+                    }
                 }
             };
 
@@ -1496,7 +1516,8 @@ public class TeamOwnerGUI extends Stage{
                     Button btn = (Button) event.getSource();
                     int id = Integer.parseInt(btn.getId());
                     expenseRequests.remove(id);
-                    //updateRequests
+                    expenseAccess.save(expenseRequests);
+                    borderPane.setCenter(expenseRequestPane());
                 }
             };
 
@@ -1524,8 +1545,12 @@ public class TeamOwnerGUI extends Stage{
             }
 
             //Add the requests followed by accept/decline buttons
-            for(int i = 0; i < request.length; i++){
-                gridPane.add(request[i], 0, i + 1);
+            for(int i = 0; i < expenseRequests.size(); i++){
+                //Create vbox to hold all request details
+                VBox requestBox = new VBox();
+                requestBox.setSpacing(5);
+                requestBox.getChildren().addAll(description[i], cost[i], timeline[i], priority[i]);
+                gridPane.add(requestBox, 0, i + 1);
 
                 gridPane.setValignment(declineButton[i], VPos.TOP);
                 gridPane.setValignment(acceptButton[i], VPos.CENTER);
@@ -1544,7 +1569,6 @@ public class TeamOwnerGUI extends Stage{
 
         return scrollPane;
     }
-
 
     /**
      * HBox for top.
