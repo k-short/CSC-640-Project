@@ -23,7 +23,7 @@ public class TeamDirectoryManagement {
      * Return the list of members after sorting them in by name.
      */
     public ArrayList<DirectoryMember> getDirectory(){
-        // sortEventList();
+        sortDirectory();
         return directory;
     }
 

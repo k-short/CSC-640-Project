@@ -30,7 +30,7 @@ public class TeamFundsManagement {
      * Return the list transactions, sorting them in reverse-chronological order.
      */
     public ArrayList<Transaction> getTransactions(){
-        // sortEventList();
+        //sortTransactions();
         return transactions;
     }
 

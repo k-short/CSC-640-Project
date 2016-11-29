@@ -24,6 +24,7 @@ public class EventScheduleManagement {
      * @return ArrayList of all events.
      */
     public ArrayList<TeamEvent> getEventList(){
+        sortEventList();
         return eventList;
     }
 
