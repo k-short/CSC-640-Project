@@ -44,6 +44,9 @@ public class CrewChiefGUI extends Stage {
     private ArrayList<IssueRecord> issueRecords;
     private int selectedIssue;
 
+    private ArrayList<ExpenseRequest> expenseRequests;
+
+
     String dummyExpense1 = "Item:\t\tTires\nCost:\t\t$2000\nTimeline:\t\tImmediate\nPriority:\t\tNormal\n";
     String dummyExpense2 = "Item:\t\tFront Springs\nCost:\t\t$1200\nTimeline:\t\t1 Week\nPriority:\t\tHigh\n";
 
@@ -182,23 +185,23 @@ public class CrewChiefGUI extends Stage {
 
         intro.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createStupidIntro());
-            borderPane.setBottom(null);
+            //borderPane.setBottom(null);
         });
 
         //Add events to buttons to execute when clicked
         requestExpenses.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createRequestExpenseScrollPane());
-            borderPane.setBottom(createRequestExpenseButtonsHBox());
+            //borderPane.setBottom(createRequestExpenseButtonsHBox());
         });
 
         prioritizeIssues.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createPrioritizeIssuesScrollPane());
-            borderPane.setBottom(createPrioritizeIssuesButtonsHBox());
+            //borderPane.setBottom(createPrioritizeIssuesButtonsHBox());
         });
 
         viewTimes.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createViewTimesScrollPane());
-            borderPane.setBottom(createViewTimesButtonsHBox());
+            //borderPane.setBottom(createViewTimesButtonsHBox());
         });
 
 
@@ -313,148 +316,192 @@ public class CrewChiefGUI extends Stage {
         return timeLogger;
     }
 
-
-    /**
-     * Create a grid pane to show information based on menu option currently selected.
-     */
     private ScrollPane createRequestExpenseScrollPane() {
 
         GridPane gridPane = new GridPane();
-        ToggleGroup toggleGroup = new ToggleGroup();
-
-        //Set padding and gaps
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 20, 20, 20));
+        int gridRow = 0;
 
-        //Dummy info to be added for now
-        Text[] expenseList = new Text[]{
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-                new Text(dummyExpense1),
-                new Text(dummyExpense2),
-        };
+        Button addButton = new Button("Add New Expense Request");
+        addButton.setOnAction((ActionEvent e) -> {
+            borderPane.setCenter(createExpenseRequestFormGridPaneAdd());
+        });
+        gridPane.add(addButton, 0, gridRow++, 3, 1);
 
-        //Add each directory string to the grid pane
-        //Set font for each
-        for (int i = 0; i < expenseList.length; i++) {
-            gridPane.add(expenseList[i], 1, i);
-            expenseList[i].setFont(TEXT_FONT);
+        expenseRequests = ExpenseAccess.getExpenseRequests();
 
-            //Add a seperator between directory members
+        if (expenseRequests == null) {
+            gridPane.add(new Text("No Expense Requests"), 0, gridRow++, 3, 1);
+            ScrollPane scrollPane = new ScrollPane(gridPane);
+            return scrollPane;
+        }
+
+        for (ExpenseRequest er : expenseRequests) {
+
+            Text txtDescription = new Text(String.valueOf(er.getDescription()));
+            txtDescription.setFont(LABEL_FONT);
+            Text txtCost = new Text(String.valueOf(er.getCost()));
+            txtCost.setFont(TEXT_FONT);
+            Text txtTimeline = new Text(er.getTimeline());
+            txtTimeline.setFont(TEXT_FONT);
+            Text txtPriority = new Text(er.getPriority());
+            txtPriority.setFont(TEXT_FONT);
+
+            Text descriptionTxt = new Text("Description: ");
+            Text costTxt = new Text("Cost: ");
+            Text timelineTxt = new Text("Timeline: ");
+            Text priorityTxt = new Text("Priority: ");
+
+            gridPane.add(descriptionTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtDescription, 1, gridRow++, 1, 1);
+
+            gridPane.add(costTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtCost, 1, gridRow++, 1, 1);
+
+            gridPane.add(timelineTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtTimeline, 1, gridRow++, 1, 1);
+
+            gridPane.add(priorityTxt, 0, gridRow, 1, 1);
+            gridPane.add(txtPriority, 1, gridRow++, 1, 1);
+
+            Button editButton = new Button("Edit");
+            editButton.setOnAction((ActionEvent e) -> {
+                borderPane.setCenter(createExpenseRequestFormGridPaneEdit(er));
+            });
+
+            Button delButton = new Button("Delete");
+            delButton.setOnAction((ActionEvent e) -> {
+                expenseRequests.remove(er);
+                ExpenseAccess.saveExpenseRequests(expenseRequests);
+                borderPane.setCenter(createRequestExpenseScrollPane());
+            });
+
+            gridPane.add(editButton, 0, gridRow, 1, 1);
+            gridPane.add(delButton, 2, gridRow++, 1, 1);
+
             Separator separator = new Separator();
             gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, i, 2, 1);
-
-            //Create a radio button to be added next to each directory member
-            RadioButton radioButton = new RadioButton("");
-            radioButton.setToggleGroup(toggleGroup);
-            gridPane.setValignment(radioButton, VPos.TOP); //Put button at top of cell
-            gridPane.add(radioButton, 0, i);
+            gridPane.add(separator, 0, gridRow++, 3, 1);
         }
 
 
-        //Add the grid pane to a scroll pane
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
         return scrollPane;
     }
 
-    private HBox createRequestExpenseButtonsHBox() {
-        HBox buttonPanel = new HBox();
-        buttonPanel.setAlignment(Pos.CENTER);
+    private GridPane createExpenseRequestFormGridPaneAdd() {
 
-        //Set the padding around the button panel
-        buttonPanel.setPadding(new Insets(10));
-
-        //Set the gaps between buttons
-        buttonPanel.setSpacing(60);
-
-        //Create some default buttons for now
-        Button deleteButton = new Button("Delete Expense");
-        Button editButton = new Button("Edit Expense");
-        Button newButton = new Button("Add New Expense");
-
-        //If edit button is selected, switch to show dir change form and buttons
-        editButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createRequestExpenseFormGridPane());
-            borderPane.setBottom(createGenericCancelSave());
-        });
-
-        newButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createRequestExpenseFormGridPane());
-            borderPane.setBottom(createGenericCancelSave());
-        });
-
-        //Show a dialog asking user if they want to delete member from directory.
-        deleteButton.setOnAction((ActionEvent e) -> {
-
-        });
-
-        //Add the buttons to the hbox
-        buttonPanel.getChildren().addAll(deleteButton, editButton, newButton);
-
-        return buttonPanel;
-    }
-
-    private GridPane createRequestExpenseFormGridPane() {
         GridPane gridPane = new GridPane();
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(25, 25, 25, 25));
+        int gridRow = 0;
 
-        //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Item:"),
-                new Label("Cost:"),
-                new Label("Timeline:"),
-                new Label("Priority:"),
-        };
+        Label descriptionLabel = new Label("Description: ");
+        Label costLabel = new Label("Cost: ");
+        Label timelineLabel = new Label("Timeline: ");
+        Label priorityLabel = new Label("Priority: ");
 
-        //Each field with default text already in directory (dummy text for now)
-        TextField[] defaultFields = new TextField[]{
-                new TextField("Front Springs"),
-                new TextField("$1200"),
-                new TextField("1 Week"),
-                new TextField("High"),
-        };
+        TextField descriptionField = new TextField("");
+        TextField costField = new TextField("");
+        TextField timelineField = new TextField("");
+        TextField priorityField = new TextField("");
 
-        //Add each label to grid pane
-        //Set normal text font to each
-        for (int i = 0; i < labels.length; i++) {
-            labels[i].setFont(TEXT_FONT);
+        gridPane.add(descriptionLabel, 0, gridRow, 1, 1);
+        gridPane.add(descriptionField, 1, gridRow++, 1, 1);
 
-            gridPane.add(labels[i], 0, i);
-            gridPane.add(defaultFields[i], 1, i);
-        }
+        gridPane.add(costLabel, 0, gridRow, 1, 1);
+        gridPane.add(costField, 1, gridRow++, 1, 1);
+
+        gridPane.add(timelineLabel, 0, gridRow, 1, 1);
+        gridPane.add(timelineField, 1, gridRow++, 1, 1);
+
+        gridPane.add(priorityLabel, 0, gridRow, 1, 1);
+        gridPane.add(priorityField, 1, gridRow++, 1, 1);
+
+        Button saveButton = new Button("Add New Expense Request");
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            if (expenseRequests == null) {
+                expenseRequests = new ArrayList<ExpenseRequest>();
+            }
+            ExpenseRequest er = new ExpenseRequest(descriptionField.getText(),
+                    Double.parseDouble(costField.getText()),
+                    timelineField.getText(),
+                    priorityField.getText());
+            expenseRequests.add(er);
+            ExpenseAccess.saveExpenseRequests(expenseRequests);
+
+            borderPane.setCenter(createRequestExpenseScrollPane());
+        });
+
+        gridPane.add(saveButton, 1, ++gridRow, 1, 1);
 
         return gridPane;
     }
 
+    private GridPane createExpenseRequestFormGridPaneEdit(ExpenseRequest record) {
 
-    /**
-     * Create a grid pane to show information based on menu option currently selected.
-     */
+
+        String description;
+        Double cost;
+        String timeline;
+        String priority;
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(25, 25, 25, 25));
+        int gridRow = 0;
+
+        Label descriptionLabel = new Label("Description: ");
+        Label costLabel = new Label("Cost: ");
+        Label timelineLabel = new Label("Timeline: ");
+        Label priorityLabel = new Label("Priority: ");
+
+        TextField descriptionField = new TextField(record.getDescription());
+        TextField costField = new TextField(String.valueOf(record.getCost()));
+        TextField timelineField = new TextField(record.getTimeline());
+        TextField priorityField = new TextField(record.getPriority());
+
+        gridPane.add(descriptionLabel, 0, gridRow, 1, 1);
+        gridPane.add(descriptionField, 1, gridRow++, 1, 1);
+
+        gridPane.add(costLabel, 0, gridRow, 1, 1);
+        gridPane.add(costField, 1, gridRow++, 1, 1);
+
+        gridPane.add(timelineLabel, 0, gridRow, 1, 1);
+        gridPane.add(timelineField, 1, gridRow++, 1, 1);
+
+        gridPane.add(priorityLabel, 0, gridRow, 1, 1);
+        gridPane.add(priorityField, 1, gridRow++, 1, 1);
+
+        Button saveButton = new Button("Save Changes");
+
+        saveButton.setOnAction((ActionEvent e) -> {
+            expenseRequests.remove(record);
+            ExpenseRequest er = new ExpenseRequest(descriptionField.getText(),
+                    Double.parseDouble(costField.getText()),
+                    timelineField.getText(),
+                    priorityField.getText());
+            expenseRequests.add(er);
+            ExpenseAccess.saveExpenseRequests(expenseRequests);
+
+            borderPane.setCenter(createRequestExpenseScrollPane());
+        });
+
+        gridPane.add(saveButton, 1, ++gridRow, 1, 1);
+
+        return gridPane;
+
+    }
+
+
+
     private ScrollPane createPrioritizeIssuesScrollPane() {
 
         GridPane gridPane = new GridPane();
@@ -462,6 +509,12 @@ public class CrewChiefGUI extends Stage {
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 20, 20, 20));
         int gridRow = 0;
+
+        Button addButton = new Button("Add New Issue");
+        addButton.setOnAction((ActionEvent e) -> {
+            borderPane.setCenter(createPrioritizeIssuesFormGridPaneAdd());
+        });
+        gridPane.add(addButton, 0, gridRow++, 3, 1);
 
         issueRecords = IssueAccess.getIssueRecords();
 
@@ -519,16 +572,25 @@ public class CrewChiefGUI extends Stage {
             gridPane.add(statusTxt, 0, gridRow, 1, 1);
             gridPane.add(txtStatus, 1, gridRow++, 1, 1);
 
-            Separator separator = new Separator();
-            gridPane.setValignment(separator, VPos.BOTTOM);
-            gridPane.add(separator, 0, gridRow++, 3, 1);
 
-            Button editButton = new Button("Add New Issue");
-
-            //If edit button is selected, switch to show dir change form and buttons
+            Button editButton = new Button("Edit");
             editButton.setOnAction((ActionEvent e) -> {
                 borderPane.setCenter(createPrioritizeIssuesFormGridPaneEdit(ir));
             });
+
+            Button delButton = new Button("Delete");
+            delButton.setOnAction((ActionEvent e) -> {
+                issueRecords.remove(ir);
+                IssueAccess.saveIssueRecords(issueRecords);
+                borderPane.setCenter(createPrioritizeIssuesScrollPane());
+            });
+
+            gridPane.add(editButton, 0, gridRow, 1, 1);
+            gridPane.add(delButton, 2, gridRow++, 1, 1);
+
+            Separator separator = new Separator();
+            gridPane.setValignment(separator, VPos.BOTTOM);
+            gridPane.add(separator, 0, gridRow++, 3, 1);
         }
 
 
@@ -538,42 +600,6 @@ public class CrewChiefGUI extends Stage {
 
     }
 
-    private HBox createPrioritizeIssuesButtonsHBox() {
-        HBox buttonPanel = new HBox();
-        buttonPanel.setAlignment(Pos.CENTER);
-
-        //Set the padding around the button panel
-        buttonPanel.setPadding(new Insets(10));
-
-        //Set the gaps between buttons
-        buttonPanel.setSpacing(60);
-
-        //Create some default buttons for now
-        Button deleteButton = new Button("Delete Issue");
-        Button editButton = new Button("Edit Issue");
-        Button newButton = new Button("Add New Issue");
-
-        //If edit button is selected, switch to show dir change form and buttons
-        editButton.setOnAction((ActionEvent e) -> {
-            //borderPane.setCenter(createPrioritizeIssuesFormGridPaneEdit());
-            borderPane.setBottom(createGenericCancelSave());
-        });
-
-        newButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createPrioritizeIssuesFormGridPaneAdd());
-            borderPane.setBottom(createGenericCancelSave());
-        });
-
-        //Show a dialog asking user if they want to delete member from directory.
-        deleteButton.setOnAction((ActionEvent e) -> {
-
-        });
-
-        //Add the buttons to the hbox
-        buttonPanel.getChildren().addAll(deleteButton, editButton, newButton);
-
-        return buttonPanel;
-    }
 
     private GridPane createPrioritizeIssuesFormGridPaneAdd() {
 
@@ -623,7 +649,6 @@ public class CrewChiefGUI extends Stage {
         Button saveButton = new Button("Add New Issue");
 
         saveButton.setOnAction((ActionEvent e) -> {
-            issueRecords = IssueAccess.getIssueRecords();
             if (issueRecords == null) {
                 issueRecords = new ArrayList<IssueRecord>();
             }
@@ -637,6 +662,7 @@ public class CrewChiefGUI extends Stage {
             issueRecords.add(ir);
             IssueAccess.saveIssueRecords(issueRecords);
 
+            borderPane.setCenter(createPrioritizeIssuesScrollPane());
         });
 
         gridPane.add(saveButton, 1, ++gridRow, 1, 1);
@@ -692,7 +718,6 @@ public class CrewChiefGUI extends Stage {
         Button saveButton = new Button("Save Changes");
 
         saveButton.setOnAction((ActionEvent e) -> {
-            issueRecords = IssueAccess.getIssueRecords();
             issueRecords.remove(record);
             if (issueRecords == null) {
                 issueRecords = new ArrayList<IssueRecord>();
@@ -706,17 +731,12 @@ public class CrewChiefGUI extends Stage {
                     statusField.getText());
             issueRecords.add(ir);
             IssueAccess.saveIssueRecords(issueRecords);
-
+            borderPane.setCenter(createPrioritizeIssuesScrollPane());
         });
 
         gridPane.add(saveButton, 1, ++gridRow, 1, 1);
 
-        borderPane.setCenter(createPrioritizeIssuesScrollPane());
-
         return gridPane;
-
-
-
 
     }
 
@@ -765,83 +785,5 @@ public class CrewChiefGUI extends Stage {
         ScrollPane scrollPane = new ScrollPane(gridPane);
 
         return scrollPane;
-    }
-
-    private HBox createViewTimesButtonsHBox() {
-        HBox buttonPanel = new HBox();
-        buttonPanel.setAlignment(Pos.CENTER);
-
-        //Set the padding around the button panel
-        buttonPanel.setPadding(new Insets(10));
-
-        //Set the gaps between buttons
-        buttonPanel.setSpacing(60);
-
-        //Create some default buttons for now
-        Button deleteButton = new Button("Delete Time");
-        Button editButton = new Button("Edit Time");
-
-        //If edit button is selected, switch to show dir change form and buttons
-        editButton.setOnAction((ActionEvent e) -> {
-            borderPane.setCenter(createEditTimeFormGridPane());
-            borderPane.setBottom(createGenericCancelSave());
-        });
-
-        //Show a dialog asking user if they want to delete member from directory.
-        deleteButton.setOnAction((ActionEvent e) -> {
-
-        });
-
-        //Add the buttons to the hbox
-        buttonPanel.getChildren().addAll(deleteButton, editButton);
-
-        return buttonPanel;
-    }
-
-    private GridPane createEditTimeFormGridPane() {
-        GridPane gridPane = new GridPane();
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(25, 25, 25, 25));
-
-        //Lables for each field
-        Label[] labels = new Label[]{
-                new Label("Event:"),
-                new Label("Lap:"),
-                new Label("Time:"),
-        };
-
-        //Each field with default text already in directory (dummy text for now)
-        TextField[] defaultFields = new TextField[]{
-                new TextField("2016081"),
-                new TextField("73"),
-                new TextField("61.149"),
-        };
-
-        //Add each label to grid pane
-        //Set normal text font to each
-        for (int i = 0; i < labels.length; i++) {
-            labels[i].setFont(TEXT_FONT);
-
-            gridPane.add(labels[i], 0, i);
-            gridPane.add(defaultFields[i], 1, i);
-        }
-
-        return gridPane;
-    }
-
-    private HBox createGenericCancelSave() {
-
-        HBox hbox = new HBox();
-        hbox.setAlignment(Pos.CENTER);
-        hbox.setPadding(new Insets(10));
-        hbox.setSpacing(60);
-
-        Button cancelButton = new Button("Cancel");
-        Button saveButton = new Button("Save Information");
-
-        hbox.getChildren().addAll(cancelButton, saveButton);
-
-        return hbox;
     }
 }
