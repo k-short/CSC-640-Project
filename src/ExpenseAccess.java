@@ -41,6 +41,29 @@ public class ExpenseAccess {
             c.printStackTrace();
         }
 
-        return expenseRequests;
+        return sort(expenseRequests);
+    }
+
+    private static ArrayList<ExpenseRequest> sort(ArrayList<ExpenseRequest> list){
+        //Insertion sort
+        ArrayList<ExpenseRequest> lowList = new ArrayList<>();
+        ArrayList<ExpenseRequest> medList = new ArrayList<>();
+        ArrayList<ExpenseRequest> highList = new ArrayList<>();
+
+        for(ExpenseRequest r : list){
+            if(r.getPriority().toLowerCase().equals("low"))
+                lowList.add(r);
+            else if (r.getPriority().toLowerCase().equals("medium"))
+                medList.add(r);
+            else
+                highList.add(r);
+        }
+
+        ArrayList<ExpenseRequest> sortedList = new ArrayList<>();
+        sortedList.addAll(highList);
+        sortedList.addAll(medList);
+        sortedList.addAll(lowList);
+
+        return sortedList;
     }
 }
