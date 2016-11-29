@@ -1565,11 +1565,13 @@ public class TeamOwnerGUI extends Stage{
                 gridPane.add(declineButton[i], 1, i + 1);
             }
         }
+        else {
+            Text noDir = new Text("There are no expense requests.");
+            noDir.setFont(LABEL_FONT);
+            gridPane.add(noDir, 0, 1);
+        }
 
         gridPane.add(remainingFunds, 0, 0);
-        Text noDir = new Text("There are no expense requests.");
-        noDir.setFont(LABEL_FONT);
-        gridPane.add(noDir, 0 ,1);
 
         //Scroll pane to hold grid pane of transactions
         ScrollPane scrollPane = new ScrollPane(gridPane);
