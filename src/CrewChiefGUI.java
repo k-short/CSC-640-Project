@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Random;
 
 /**
@@ -150,12 +151,16 @@ public class CrewChiefGUI extends Stage {
         //Create menu buttons
         ToggleButton intro = new ToggleButton("Intro");
         intro.setPrefWidth(prefWidth);
+        intro.setFont(MENU_TITLE_FONT);
         ToggleButton requestExpenses = new ToggleButton("Request Expense");
         requestExpenses.setPrefWidth(prefWidth);
+        requestExpenses.setFont(MENU_TITLE_FONT);
         ToggleButton prioritizeIssues = new ToggleButton("Prioritize Issues");
         prioritizeIssues.setPrefWidth(prefWidth);
+        prioritizeIssues.setFont(MENU_TITLE_FONT);
         ToggleButton viewTimes = new ToggleButton("View Times");
         viewTimes.setPrefWidth(prefWidth);
+        viewTimes.setFont(MENU_TITLE_FONT);
 
         //Add buttons to Togglegroup so only one can be toggled on
         ToggleGroup toggleGroup = new ToggleGroup();
@@ -166,25 +171,24 @@ public class CrewChiefGUI extends Stage {
 
         intro.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createStupidIntro());
-            //borderPane.setBottom(null);
+            intro.setSelected(false);
         });
 
         //Add events to buttons to execute when clicked
         requestExpenses.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createRequestExpenseScrollPane());
-            //borderPane.setBottom(createRequestExpenseButtonsHBox());
+            requestExpenses.setSelected(false);
         });
 
         prioritizeIssues.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createPrioritizeIssuesScrollPane());
-            //borderPane.setBottom(createPrioritizeIssuesButtonsHBox());
+            prioritizeIssues.setSelected(false);
         });
 
         viewTimes.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createViewTimesScrollPane());
-            //borderPane.setBottom(createViewTimesButtonsHBox());
+            viewTimes.setSelected(false);
         });
-
 
         //Array of menu options
         ToggleButton[] menuOptions = new ToggleButton[]{intro, requestExpenses, prioritizeIssues, viewTimes};
@@ -209,7 +213,6 @@ public class CrewChiefGUI extends Stage {
         EventAccess ea = new EventAccess();
         eventList = ea.getEvents();
 
-        //ArrayList<String> events = new ArrayList<>();
         String[] eventStrs = new String[eventList.size()];
         int eventItr = 0;
 
@@ -220,12 +223,10 @@ public class CrewChiefGUI extends Stage {
         for (TeamEvent te : eventList) {
             String str = te.getTitle();
             str += " (" + te.getDate() + ")";
-            //events.add(te.getTitle());
             eventStrs[eventItr++] = str;
         }
 
         return eventStrs;
-        //return (String[]) events.toArray();
     }
 
     private VBox createTimeLogger() {
@@ -271,6 +272,7 @@ public class CrewChiefGUI extends Stage {
         timeLogger.getChildren().addAll(timeLabel, timeField);
 
         ToggleButton logTime = new ToggleButton("Log Time");
+        logTime.setFont(MENU_TITLE_FONT);
         logTime.setOnAction((ActionEvent e) -> {
 
             int lap = Integer.parseInt(lapField.getText());
@@ -306,6 +308,7 @@ public class CrewChiefGUI extends Stage {
         int gridRow = 0;
 
         Button addButton = new Button("Add New Expense Request");
+        addButton.setFont(MENU_TITLE_FONT);
         addButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createExpenseRequestFormGridPaneAdd());
         });
@@ -348,11 +351,13 @@ public class CrewChiefGUI extends Stage {
             gridPane.add(txtPriority, 1, gridRow++, 1, 1);
 
             Button editButton = new Button("Edit");
+            editButton.setFont(MENU_TITLE_FONT);
             editButton.setOnAction((ActionEvent e) -> {
                 borderPane.setCenter(createExpenseRequestFormGridPaneEdit(er));
             });
 
             Button delButton = new Button("Delete");
+            delButton.setFont(MENU_TITLE_FONT);
             delButton.setOnAction((ActionEvent e) -> {
                 expenseRequests.remove(er);
                 ExpenseAccess.saveExpenseRequests(expenseRequests);
@@ -404,7 +409,7 @@ public class CrewChiefGUI extends Stage {
         gridPane.add(priorityField, 1, gridRow++, 1, 1);
 
         Button saveButton = new Button("Add New Expense Request");
-
+        saveButton.setFont(MENU_TITLE_FONT);
         saveButton.setOnAction((ActionEvent e) -> {
             if (expenseRequests == null) {
                 expenseRequests = new ArrayList<ExpenseRequest>();
@@ -455,7 +460,7 @@ public class CrewChiefGUI extends Stage {
         gridPane.add(priorityField, 1, gridRow++, 1, 1);
 
         Button saveButton = new Button("Save Changes");
-
+        saveButton.setFont(MENU_TITLE_FONT);
         saveButton.setOnAction((ActionEvent e) -> {
             expenseRequests.remove(record);
             ExpenseRequest er = new ExpenseRequest(descriptionField.getText(),
@@ -474,6 +479,22 @@ public class CrewChiefGUI extends Stage {
 
     }
 
+    public static Comparator<IssueRecord> issueComparator = new Comparator<IssueRecord>() {
+
+        @Override
+        public int compare(IssueRecord ir1, IssueRecord ir2) {
+
+            return (ir1.getOrder() - ir2.getOrder());
+        }
+
+    };
+
+    public void sortIssues(){
+
+        issueRecords.sort(issueComparator);
+
+    }
+
 
     private ScrollPane createPrioritizeIssuesScrollPane() {
 
@@ -484,12 +505,14 @@ public class CrewChiefGUI extends Stage {
         int gridRow = 0;
 
         Button addButton = new Button("Add New Issue");
+        addButton.setFont(MENU_TITLE_FONT);
         addButton.setOnAction((ActionEvent e) -> {
             borderPane.setCenter(createPrioritizeIssuesFormGridPaneAdd());
         });
         gridPane.add(addButton, 0, gridRow++, 3, 1);
 
         issueRecords = IssueAccess.getIssueRecords();
+        sortIssues();
 
         if (issueRecords == null) {
             gridPane.getChildren().add(new Text("No Issue Records"));
@@ -547,13 +570,25 @@ public class CrewChiefGUI extends Stage {
 
 
             Button editButton = new Button("Edit");
+            editButton.setFont(MENU_TITLE_FONT);
             editButton.setOnAction((ActionEvent e) -> {
                 borderPane.setCenter(createPrioritizeIssuesFormGridPaneEdit(ir));
             });
 
             Button delButton = new Button("Delete");
+            delButton.setFont(MENU_TITLE_FONT);
             delButton.setOnAction((ActionEvent e) -> {
+
+                // reorder on deletion
+                int currentOrder = ir.getOrder();
                 issueRecords.remove(ir);
+                for(IssueRecord ir2 : issueRecords){
+                    if(ir2.getOrder() > currentOrder){
+                        ir2.setOrder(ir2.getOrder() - 1);
+                    }
+                }
+
+                sortIssues();
                 IssueAccess.saveIssueRecords(issueRecords);
                 borderPane.setCenter(createPrioritizeIssuesScrollPane());
             });
@@ -620,7 +655,7 @@ public class CrewChiefGUI extends Stage {
         gridPane.add(statusField, 1, gridRow++, 1, 1);
 
         Button saveButton = new Button("Add New Issue");
-
+        saveButton.setFont(MENU_TITLE_FONT);
         saveButton.setOnAction((ActionEvent e) -> {
             if (issueRecords == null) {
                 issueRecords = new ArrayList<IssueRecord>();
@@ -632,7 +667,17 @@ public class CrewChiefGUI extends Stage {
                     timelineField.getText(),
                     priorityField.getText(),
                     statusField.getText());
+
+            // reorder on addition
+            int currentOrder = ir.getOrder();
+            for(IssueRecord ir2 : issueRecords){
+                if(ir2.getOrder() >= currentOrder){
+                    ir2.setOrder(ir2.getOrder() + 1);
+                }
+            }
+
             issueRecords.add(ir);
+            sortIssues();
             IssueAccess.saveIssueRecords(issueRecords);
 
             borderPane.setCenter(createPrioritizeIssuesScrollPane());
@@ -689,9 +734,18 @@ public class CrewChiefGUI extends Stage {
         gridPane.add(statusField, 1, gridRow++, 1, 1);
 
         Button saveButton = new Button("Save Changes");
-
+        saveButton.setFont(MENU_TITLE_FONT);
         saveButton.setOnAction((ActionEvent e) -> {
+
+            // reorder on deletion
+            int currentOrder = record.getOrder();
             issueRecords.remove(record);
+            for(IssueRecord ir2 : issueRecords){
+                if(ir2.getOrder() > currentOrder){
+                    ir2.setOrder(ir2.getOrder() - 1);
+                }
+            }
+
             if (issueRecords == null) {
                 issueRecords = new ArrayList<IssueRecord>();
             }
@@ -702,7 +756,18 @@ public class CrewChiefGUI extends Stage {
                     timelineField.getText(),
                     priorityField.getText(),
                     statusField.getText());
+
+            // reorder on addition
+            currentOrder = ir.getOrder();
+            for(IssueRecord ir2 : issueRecords){
+                if(ir2.getOrder() >= currentOrder){
+                    ir2.setOrder(ir2.getOrder() + 1);
+                }
+            }
+
             issueRecords.add(ir);
+            sortIssues();
+
             IssueAccess.saveIssueRecords(issueRecords);
             borderPane.setCenter(createPrioritizeIssuesScrollPane());
         });
@@ -750,11 +815,13 @@ public class CrewChiefGUI extends Stage {
             gridPane.add(txt3, 2, gridRow++, 1, 1);
 
             Button editButton = new Button("Edit");
+            editButton.setFont(MENU_TITLE_FONT);
             editButton.setOnAction((ActionEvent e) -> {
                 borderPane.setCenter(createTimeRecordFormGridPaneEdit(tr));
             });
 
             Button delButton = new Button("Delete");
+            delButton.setFont(MENU_TITLE_FONT);
             delButton.setOnAction((ActionEvent e) -> {
                 timeRecords.remove(tr);
                 TimeAccess.saveTimeRecords(timeRecords);
@@ -806,7 +873,7 @@ public class CrewChiefGUI extends Stage {
         gridPane.add(timeField, 1, gridRow++, 1, 1);
 
         Button saveButton = new Button("Save Changes");
-
+        saveButton.setFont(MENU_TITLE_FONT);
         saveButton.setOnAction((ActionEvent e) -> {
             timeRecords.remove(record);
             TimeRecord tr = new TimeRecord(nameField.getText(),
