@@ -1456,7 +1456,7 @@ public class TeamOwnerGUI extends Stage{
         Label remainingFunds = new Label("Available Funds: $" + remFunds);
         remainingFunds.setFont(LABEL_FONT);
 
-        if(expenseRequests.size() > 0) {
+        if(expenseRequests != null) {
             //Array of descriptions as Texts
             Text[] description = new Text[expenseRequests.size()];
             for (int i = 0; i < description.length; i++) {
@@ -1498,13 +1498,13 @@ public class TeamOwnerGUI extends Stage{
                     int id = Integer.parseInt(btn.getId());
 
                     //See if there are enough funds to accept the request
-                    if(expenseRequests.get(id).getCost() > remainingFunds){
+                    if(expenseRequests.get(id).getCost() > totalFunds){
                         //display error dialog
                         Stage errorStage = new ErrorDialog("Insufficient funds available.");
                         errorStage.show();
                     }else{
                         expenseRequests.remove(id);
-                        expenseAccess.save(expenseRequests);
+                        expenseAccess.saveExpenseRequests(expenseRequests);
                         borderPane.setCenter(expenseRequestPane());
                     }
                 }
@@ -1516,7 +1516,7 @@ public class TeamOwnerGUI extends Stage{
                     Button btn = (Button) event.getSource();
                     int id = Integer.parseInt(btn.getId());
                     expenseRequests.remove(id);
-                    expenseAccess.save(expenseRequests);
+                    expenseAccess.saveExpenseRequests(expenseRequests);
                     borderPane.setCenter(expenseRequestPane());
                 }
             };
