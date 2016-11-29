@@ -1362,7 +1362,9 @@ public class TeamOwnerGUI extends Stage{
         });
 
         submitButton.setOnAction((ActionEvent e) -> {
-            Double amount = Double.parseDouble(addFundsTextField.getText());
+            String str = addFundsTextField.getText();
+            str = str.replace(",", "");
+            Double amount = Double.parseDouble(str);
 
             //Update total funds
             Double newTotalFunds = totalFunds + amount;
